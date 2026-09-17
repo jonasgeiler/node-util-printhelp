@@ -1,0 +1,15 @@
+######################################
+#          Git ignore file           #
+# https://git-scm.com/docs/gitignore #
+######################################
+
+# Editor/IDE
+.idea/*
+!.idea/externalDependencies.xml
+!.idea/icon.svg
+.vscode/*
+!.vscode/extensions.json
+
+# Temporary Files
+scratch.*
+scribble.*

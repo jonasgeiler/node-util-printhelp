@@ -1,0 +1,11 @@
+/*******************************************************/
+/*              Mend Renovate config file              */
+/* https://docs.renovatebot.com/configuration-options/ */
+/*******************************************************/
+
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>jonasgeiler/renovate-config"
+  ]
+}
