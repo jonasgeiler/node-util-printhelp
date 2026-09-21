@@ -6,6 +6,107 @@ import { StringBuilder } from "./string-builder.ts";
 import type { ParseArgsOptionDescriptor } from "node:util";
 import type { WriteStream } from "node:tty";
 
+function indent(text: string, depth: number) {
+	return text.replace(/^/gm, ' '.repeat(depth));
+}
+
+function fold(text: string, width: number) {
+	return text.replace(
+		new RegExp(`([^\n]{0,${width}})( |$)`, 'g'),
+		(_, newLine, end) => newLine + (end === ' ' ? '\n' : ''),
+	);
+}
+
+function getArgDescription(type: any) {
+	switch (typeof type) {
+		case "boolean":
+		case "undefined":
+			break;
+		case "number":
+		case "string":
+		case "bigint":
+			return '...';
+		default:
+			throw new Error(`Unknown option type ${type}`);
+	}
+}
+
+export function format(
+	{ options, aliases = new Map(), firstColumn, secondColumn, nameStyle = [] },
+) {
+	let text = '';
+	let maxFirstColumnUsed = 0;
+
+	const sortedOptions = [...options.entries()].sort(
+		({ 0: name1, 1: option1 }, { 0: name2, 1: option2 }) => {
+			if (option1.defaultIsTrue) {
+				name1 = `--no-${name1.slice(2)}`;
+			}
+			if (option2.defaultIsTrue) {
+				name2 = `--no-${name2.slice(2)}`;
+			}
+			return name1.localeCompare(name2);
+		},
+	);
+
+	for (const {
+		0: name, 1: { helpText, type, defaultIsTrue },
+	} of sortedOptions) {
+		if (!helpText) continue;
+
+		let displayName = name;
+
+		if (defaultIsTrue) {
+			displayName = `--no-${displayName.slice(2)}`;
+		}
+
+		const argDescription = getArgDescription(type);
+		if (argDescription)
+			displayName += `=${argDescription}`;
+
+		for (const { 0: from, 1: to } of aliases) {
+			// For cases like e.g. `-e, --eval`.
+			if (to[0] === name && to.length === 1) {
+				displayName = `${from}, ${displayName}`;
+			}
+
+			// For cases like `--inspect-brk[=[host:]port]`.
+			const targetInfo = options.get(to[0]);
+			const targetArgDescription =
+				targetInfo ? getArgDescription(targetInfo.type) : '...';
+			if (from === `${name}=`) {
+				displayName += `[=${targetArgDescription}]`;
+			} else if (from === `${name} <arg>`) {
+				displayName += ` [${targetArgDescription}]`;
+			}
+		}
+
+		let displayHelpText = helpText;
+
+		text += styleText(nameStyle, displayName, { stream: process.stdout });
+		maxFirstColumnUsed = Math.max(maxFirstColumnUsed, displayName.length);
+		if (displayName.length >= firstColumn)
+			text += '\n' + ' '.repeat(firstColumn);
+		else
+			text += ' '.repeat(firstColumn - displayName.length);
+
+		text += indent(fold(displayHelpText, secondColumn), firstColumn).trimStart() + '\n';
+	}
+
+	if (maxFirstColumnUsed < firstColumn - 4) {
+		// If we have more than 4 blank gap spaces, reduce first column width.
+		return format({
+			options,
+			aliases,
+			firstColumn: maxFirstColumnUsed + 2,
+			secondColumn,
+			nameStyle,
+		});
+	}
+
+	return text;
+}
+
 export function getCLIName(): string {
 	const isEval =
 		process.execArgv.includes('--eval') ||
