@@ -148,66 +148,77 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 	const firstColumn = Math.floor(width * 0.4);
 	const secondColumn = Math.floor(width * 0.57);
 
-	if (parseArgsConfig.description) {
-		stream.write(parseArgsConfig.description);
-		stream.write("\n\n");
-	}
-	stream.write(bold(`Usage: ${parseArgsConfig.name} [options]`));
-	stream.write("\n\n");
+	stream.cork();
 
-	if (parseArgsConfig.options) {
-		stream.write(bold("Options:"));
-		stream.write("\n");
-		for (const [optionLong, option] of Object.entries(parseArgsConfig.options)) {
-			const entryStart = new StringBuilder();
-			entryStart.write("  ");
-
-			// Add start of the entry with the option name.
-			if (option.short) {
-				entryStart.write("-");
-				entryStart.write(option.short);
-				entryStart.write(", ");
-			}
-			entryStart.write("--");
-			entryStart.write(optionLong);
-			if (option.type === "string") {
-				entryStart.write("=...");
-			}
-
-			// Finalize the start of the entry with its terminal colors.
-			const entryStartStr = entryStart.toString();
-			let entryStartLen = entryStart.length;
-			stream.write(bold(green(entryStartStr)));
-
-			if (option.description || option.default !== undefined) {
-				// Add padding.
-				if (entryStartLen >= DESCRIPTION_COLUMN - 1) {
-					// Description needs to start at the next line.
-					stream.write("\n");
-					entryStartLen = 0;
-				}
-				stream.write(" ".repeat(Math.max(2, DESCRIPTION_COLUMN - entryStartLen)));
-
-				// Add description.
-				let hasDescription = false;
-				if (option.description) {
-					hasDescription = true;
-
-					stream.write(option.description);
-				}
-
-				// Add default value.
-				if (option.default !== undefined) {
-					if (hasDescription) {
-						stream.write(" ");
-					}
-					stream.write("(default: ");
-					stream.write(JSON.stringify(option.default));
-					stream.write(")");
-				}
-			}
-
-			stream.write("\n");
+	try {
+		if (parseArgsConfig.description) {
+			stream.write(parseArgsConfig.description);
+			stream.write("\n\n");
 		}
+		stream.write(bold(`Usage: ${parseArgsConfig.name} [options]`));
+		stream.write("\n\n");
+
+		if (parseArgsConfig.options) {
+			stream.write(bold("Options:"));
+			stream.write("\n");
+			for (const [optionLong, option] of
+				Object.entries(parseArgsConfig.options)) {
+				const entryStart = new StringBuilder();
+				entryStart.write("  ");
+
+				// Add start of the entry with the option name.
+				if (option.short) {
+					entryStart.write("-");
+					entryStart.write(option.short);
+					entryStart.write(", ");
+				}
+				entryStart.write("--");
+				entryStart.write(optionLong);
+				if (option.type === "string") {
+					entryStart.write("=...");
+				}
+
+				// Finalize the start of the entry with its terminal colors.
+				const entryStartStr = entryStart.toString();
+				let entryStartLen = entryStart.length;
+				stream.write(bold(green(entryStartStr)));
+
+				if (option.description || option.default !== undefined) {
+					// Add padding.
+					if (entryStartLen >= DESCRIPTION_COLUMN - 1) {
+						// Description needs to start at the next line.
+						stream.write("\n");
+						entryStartLen = 0;
+					}
+					stream.write(" ".repeat(Math.max(
+						2,
+						DESCRIPTION_COLUMN - entryStartLen
+					)));
+
+					// Add description.
+					let hasDescription = false;
+					if (option.description) {
+						hasDescription = true;
+
+						stream.write(option.description);
+					}
+
+					// Add default value.
+					if (option.default !== undefined) {
+						if (hasDescription) {
+							stream.write(" ");
+						}
+						stream.write("(default: ");
+						stream.write(JSON.stringify(option.default));
+						stream.write(")");
+					}
+				}
+
+				stream.write("\n");
+			}
+		}
+
+	} finally {
+		stream.uncork();
 	}
 }
