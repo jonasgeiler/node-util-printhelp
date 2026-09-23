@@ -29,6 +29,19 @@ function getArgDescription(type: any) {
 		default:
 			throw new Error(`Unknown option type ${type}`);
 	}
+	return "";
+}
+
+function formatColumnText(text: string, firstColumn: number, secondColumn: number) {
+	// Combination of the indent and fold functions from:
+	// https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L93-L103
+	return text
+		.replace(
+			new RegExp(`([^\n]{0,${secondColumn}})( |$)`, 'g'),
+			(_, newLine, end) => newLine + (end === ' ' ? '\n' : ''),
+		)
+		.replace(/^/gm, ' '.repeat(firstColumn))
+		.trimStart();
 }
 
 export function format(
@@ -120,8 +133,6 @@ export function getCLIName(): string {
 	return cliName + " " + process.execArgv.join(' ');
 }
 
-const DESCRIPTION_COLUMN = 30;
-
 export interface ParseArgsAndHelpOptionDescriptor extends ParseArgsOptionDescriptor {
 	description?: string;
 }
@@ -143,11 +154,6 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 	const bold = (text: string) => styleText("bold", text, { stream });
 	const green = (text: string) => styleText("green", text, { stream });
 
-	// Use 75 % of the available width, and at least 70 characters.
-	const width = Math.max(70, (stream.columns || 0) * 0.75);
-	const firstColumn = Math.floor(width * 0.4);
-	const secondColumn = Math.floor(width * 0.57);
-
 	stream.cork();
 
 	try {
@@ -159,8 +165,35 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 		stream.write("\n\n");
 
 		if (parseArgsConfig.options) {
+			// Use 75 % of the available width, and at least 70 characters.
+			const width = Math.max(70, (stream.columns || 0) * 0.75);
+
 			stream.write(bold("Options:"));
 			stream.write("\n");
+
+			let firstColumn = Math.floor(width * 0.4);
+			let maxFirstColumnUsed = 0;
+			for (const [optionLong, option] of Object.entries(parseArgsConfig.options)) {
+				let firstColumnUsed = 4 + optionLong.length; // "  --" + long
+				if (option.short) {
+					firstColumnUsed += 3 + option.short.length; // "-" + short + ", "
+				}
+				if (parseArgsConfig.allowNegative && option.type === "boolean" && option.default === true) {
+					firstColumnUsed += 3; // "no-"
+				}
+				if (option.type === "string") {
+					firstColumnUsed += 4; // "=..."
+				}
+
+				if (firstColumnUsed > maxFirstColumnUsed) {
+					maxFirstColumnUsed = firstColumnUsed;
+				}
+			}
+			if (maxFirstColumnUsed < firstColumn - 4) {
+				firstColumn = maxFirstColumnUsed + 2;
+			}
+
+			const secondColumn = Math.floor(width * 0.57);
 			for (const [optionLong, option] of
 				Object.entries(parseArgsConfig.options)) {
 				const entryStart = new StringBuilder();
@@ -173,6 +206,9 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 					entryStart.write(", ");
 				}
 				entryStart.write("--");
+				if (parseArgsConfig.allowNegative && option.type === "boolean" && option.default === true) {
+					entryStart.write("no-");
+				}
 				entryStart.write(optionLong);
 				if (option.type === "string") {
 					entryStart.write("=...");
@@ -185,14 +221,14 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 
 				if (option.description || option.default !== undefined) {
 					// Add padding.
-					if (entryStartLen >= DESCRIPTION_COLUMN - 1) {
+					if (entryStartLen >= firstColumn - 1) {
 						// Description needs to start at the next line.
 						stream.write("\n");
 						entryStartLen = 0;
 					}
 					stream.write(" ".repeat(Math.max(
 						2,
-						DESCRIPTION_COLUMN - entryStartLen
+						firstColumn - entryStartLen,
 					)));
 
 					// Add description.
@@ -200,14 +236,22 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 					if (option.description) {
 						hasDescription = true;
 
-						stream.write(option.description);
+						stream.write(formatColumnText(option.description, firstColumn, secondColumn));
 					}
 
 					// Add default value.
-					if (option.default !== undefined) {
+					if (
+						option.default !== undefined &&
+						(
+							option.type !== "boolean" ||
+							// Don't show redundant default for boolean options.
+							(!parseArgsConfig.allowNegative && option.default !== false)
+						)
+					) {
 						if (hasDescription) {
 							stream.write(" ");
 						}
+						// TODO: Maybe wrap "(default: " to next line if needed?
 						stream.write("(default: ");
 						stream.write(JSON.stringify(option.default));
 						stream.write(")");
@@ -217,8 +261,7 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 				stream.write("\n");
 			}
 		}
-
 	} finally {
-		stream.uncork();
+		process.nextTick(() => stream.uncork());
 	}
 }
