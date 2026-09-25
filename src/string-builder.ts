@@ -14,9 +14,4 @@ export class StringBuilder {
 		this.#buf.push(str);
 		this.#len += str.length;
 	}
-
-	public reset() {
-		this.#buf = [];
-		this.#len = 0;
-	}
 }

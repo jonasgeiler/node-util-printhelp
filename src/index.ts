@@ -171,29 +171,29 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 			stream.write(bold("Options:"));
 			stream.write("\n");
 
-			let firstColumn = Math.floor(width * 0.4);
+			let firstColumnWidth = Math.floor(width * 0.4);
 			let maxFirstColumnUsed = 0;
 			for (const [optionLong, option] of Object.entries(parseArgsConfig.options)) {
-				let firstColumnUsed = 4 + optionLong.length; // "  --" + long
+				let firstColumnUsed = 4 + optionLong.length; // 4 = "  " + "--"
 				if (option.short) {
-					firstColumnUsed += 3 + option.short.length; // "-" + short + ", "
+					firstColumnUsed += 3 + option.short.length; // 3 = "-" + ", "
 				}
 				if (parseArgsConfig.allowNegative && option.type === "boolean" && option.default === true) {
-					firstColumnUsed += 3; // "no-"
+					firstColumnUsed += 3; // 3 = "no-"
 				}
 				if (option.type === "string") {
-					firstColumnUsed += 4; // "=..."
+					firstColumnUsed += 4; // 4 = "=..."
 				}
 
 				if (firstColumnUsed > maxFirstColumnUsed) {
 					maxFirstColumnUsed = firstColumnUsed;
 				}
 			}
-			if (maxFirstColumnUsed < firstColumn - 4) {
-				firstColumn = maxFirstColumnUsed + 2;
+			if (maxFirstColumnUsed < firstColumnWidth - 4) {
+				firstColumnWidth = maxFirstColumnUsed + 2;
 			}
 
-			const secondColumn = Math.floor(width * 0.57);
+			const secondColumnWidth = Math.floor(width * 0.57);
 			for (const [optionLong, option] of
 				Object.entries(parseArgsConfig.options)) {
 				const entryStart = new StringBuilder();
@@ -215,28 +215,39 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 				}
 
 				// Finalize the start of the entry with its terminal colors.
-				const entryStartStr = entryStart.toString();
-				let entryStartLen = entryStart.length;
-				stream.write(bold(green(entryStartStr)));
+				stream.write(bold(green(entryStart.toString())));
 
 				if (option.description || option.default !== undefined) {
 					// Add padding.
-					if (entryStartLen >= firstColumn - 1) {
+					let entryStartLen = entryStart.length;
+					if (entryStartLen >= firstColumnWidth - 1) {
 						// Description needs to start at the next line.
 						stream.write("\n");
 						entryStartLen = 0;
 					}
-					stream.write(" ".repeat(Math.max(
-						2,
-						firstColumn - entryStartLen,
-					)));
+					const paddingLen = Math.max(2, firstColumnWidth - entryStartLen);
+					stream.write(" ".repeat(paddingLen));
+
+					// Holds the length of the last line written, used later below.
+					let lastLineLen = entryStartLen + paddingLen;
 
 					// Add description.
 					let hasDescription = false;
 					if (option.description) {
 						hasDescription = true;
 
-						stream.write(formatColumnText(option.description, firstColumn, secondColumn));
+						const formattedDescription = formatColumnText(option.description, firstColumnWidth, secondColumnWidth);
+						stream.write(formattedDescription);
+
+						const descLines = formattedDescription.split("\n");
+						const descLinesLen = descLines.length;
+						if (descLinesLen > 1) {
+							// Description has been wrapped, so set new last line length.
+							lastLineLen = descLines[descLinesLen - 1]!.length;
+						} else if (descLinesLen === 1) {
+							// Just add the only description line to last line length.
+							lastLineLen += descLines[descLinesLen - 1]!.length;
+						}
 					}
 
 					// Add default value.
@@ -248,12 +259,18 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 							(!parseArgsConfig.allowNegative && option.default !== false)
 						)
 					) {
-						if (hasDescription) {
+						const formattedDefault = JSON.stringify(option.default);
+						if (lastLineLen + 11 + formattedDefault.length > firstColumnWidth + secondColumnWidth) { // 11 = "(default: " + ")"
+							// Last line does not fit the default info, so wrap to next line.
+							stream.write("\n");
+							stream.write(" ".repeat(firstColumnWidth));
+						} else if (hasDescription) {
+							// Default value will be written to same line as description,
+							// so add a space in between.
 							stream.write(" ");
 						}
-						// TODO: Maybe wrap "(default: " to next line if needed?
 						stream.write("(default: ");
-						stream.write(JSON.stringify(option.default));
+						stream.write(formattedDefault);
 						stream.write(")");
 					}
 				}
