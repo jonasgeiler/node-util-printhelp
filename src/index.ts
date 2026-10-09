@@ -64,6 +64,9 @@ function indentText(text: string, depth: number) {
  */
 export interface ParseArgsOptionDescriptorWithHelpText
 	extends ParseArgsOptionDescriptor {
+	/**
+	 * A description of the option, printed next to this option in the help text.
+	 */
 	description?: string | undefined;
 }
 
@@ -80,14 +83,38 @@ export interface ParseArgsOptionsConfigWithHelpText {
  * information for {@link printHelp}.
  */
 export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
+	/**
+	 * An overall description of the CLI, printed before the usage string in the
+	 * help text.
+	 */
 	description?: string | undefined;
+	/**
+	 * The name of the CLI, used in the usage string of the help text.
+	 */
 	name?: string | undefined;
+	/**
+	 * Usage information for positional arguments appended to the usage string of
+	 * the help text.
+	 */
 	positionalsUsage?: string | undefined;
+	/**
+	 * A footer for the help text, printed after the options listing in the
+	 * help text.
+	 */
 	footer?: string | undefined;
 
+	/**
+	 * Used to describe arguments known to the parser.
+	 */
 	options?: ParseArgsOptionsConfigWithHelpText | undefined;
 }
 
+/**
+ * Print help text for the given `util.parseArgs` configuration, formatted
+ * for the given TTY stream.
+ * @param parseArgsConfig
+ * @param stream
+ */
 export function printHelp(
 	parseArgsConfig: ParseArgsConfigWithHelpText,
 	stream: WriteStream = process.stdout,
