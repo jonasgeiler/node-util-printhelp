@@ -3,7 +3,6 @@ import * as process from "node:process";
 import type { WriteStream } from "node:tty";
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
-import { StringBuilder } from "./string-builder.ts";
 
 function indent(text: string, depth: number) {
 	return text.replace(/^/gm, " ".repeat(depth));
@@ -218,30 +217,26 @@ export function printHelp(
 			for (const [optionLong, option] of Object.entries(
 				parseArgsConfig.options,
 			)) {
-				const entryStart = new StringBuilder();
-				entryStart.write("  ");
-
 				// Add start of the entry with the option name.
+				let entryStart = "  ";
 				if (option.short) {
-					entryStart.write("-");
-					entryStart.write(option.short);
-					entryStart.write(", ");
+					entryStart += `-${option.short}, `;
 				}
-				entryStart.write("--");
+				entryStart += "--";
 				if (
 					parseArgsConfig.allowNegative &&
 					option.type === "boolean" &&
 					option.default === true
 				) {
-					entryStart.write("no-");
+					entryStart += "no-";
 				}
-				entryStart.write(optionLong);
+				entryStart += optionLong;
 				if (option.type === "string") {
-					entryStart.write("=...");
+					entryStart += "=...";
 				}
 
 				// Finalize the start of the entry with its terminal colors.
-				stream.write(bold(green(entryStart.toString())));
+				stream.write(bold(green(entryStart)));
 
 				if (option.description || option.default !== undefined) {
 					// Add padding.
