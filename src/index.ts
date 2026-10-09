@@ -179,30 +179,43 @@ export function printHelp(
 		stream.write("\n\n");
 
 		if (parseArgsConfig.options) {
+			const sortedOptions = Object.entries(parseArgsConfig.options)
+				.map((optionEntry) => {
+					if (
+						parseArgsConfig.allowNegative &&
+						optionEntry[1].type === "boolean" &&
+						optionEntry[1].default === true
+					) {
+						// Prepend "no-" to long option name, since it's the only usage way.
+						// (We mainly do this here for sorting the options properly)
+						return ["no-" + optionEntry[0], optionEntry[1]] as [
+							string,
+							ParseArgsAndHelpOptionDescriptor,
+						];
+					}
+					return optionEntry;
+				})
+				.sort(([option1Long], [option2Long]) =>
+					option1Long.localeCompare(option2Long),
+				);
+
 			// Use 75 % of the available width, and at least 70 characters.
 			const width = Math.max(70, (stream.columns || 0) * 0.75);
+			const secondColumnWidth = Math.floor(width * 0.57);
 
-			stream.write(bold("Options:"));
-			stream.write("\n");
-
+			// Calculate optimal first column width.
 			let firstColumnWidth = Math.floor(width * 0.4);
 			let maxFirstColumnUsed = 0;
-			for (const [optionLong, option] of Object.entries(
-				parseArgsConfig.options,
-			)) {
-				let firstColumnUsed = 4 + optionLong.length; // 4 = "  " + "--"
+			for (const [optionLong, option] of sortedOptions) {
+				//                            4 = ("  " + "--").length
+				let firstColumnUsed = 4 + optionLong.length;
 				if (option.short) {
-					firstColumnUsed += 3 + option.short.length; // 3 = "-" + ", "
-				}
-				if (
-					parseArgsConfig.allowNegative &&
-					option.type === "boolean" &&
-					option.default === true
-				) {
-					firstColumnUsed += 3; // 3 = "no-"
+					//                 3 == ("-" + ", ").length
+					firstColumnUsed += 3 + option.short.length;
 				}
 				if (option.type === "string") {
-					firstColumnUsed += 4; // 4 = "=..."
+					//                 4 == "=...".length
+					firstColumnUsed += 4;
 				}
 
 				if (firstColumnUsed > maxFirstColumnUsed) {
@@ -210,49 +223,42 @@ export function printHelp(
 				}
 			}
 			if (maxFirstColumnUsed < firstColumnWidth - 4) {
+				// If we have more than 4 blank gap spaces, reduce first column width.
 				firstColumnWidth = maxFirstColumnUsed + 2;
 			}
 
-			const secondColumnWidth = Math.floor(width * 0.57);
-			for (const [optionLong, option] of Object.entries(
-				parseArgsConfig.options,
-			)) {
-				// Add start of the entry with the option name.
-				let entryStart = "  ";
+			// Print the options.
+			stream.write(bold("Options:"));
+			stream.write("\n");
+			for (const [optionLong, option] of sortedOptions) {
+				// Build display name of the option.
+				let displayName = "  ";
 				if (option.short) {
-					entryStart += `-${option.short}, `;
+					displayName += `-${option.short}, `;
 				}
-				entryStart += "--";
-				if (
-					parseArgsConfig.allowNegative &&
-					option.type === "boolean" &&
-					option.default === true
-				) {
-					entryStart += "no-";
-				}
-				entryStart += optionLong;
+				displayName += `--${optionLong}`;
 				if (option.type === "string") {
-					entryStart += "=...";
+					displayName += "=...";
 				}
 
-				// Finalize the start of the entry with its terminal colors.
-				stream.write(bold(green(entryStart)));
+				// Print the display name with its styling.
+				stream.write(bold(green(displayName)));
 
 				if (option.description || option.default !== undefined) {
-					// Add padding.
-					let entryStartLen = entryStart.length;
-					if (entryStartLen >= firstColumnWidth - 1) {
+					// Print a padding.
+					let displayNameLen = displayName.length;
+					if (displayNameLen >= firstColumnWidth - 1) {
 						// Description needs to start at the next line.
 						stream.write("\n");
-						entryStartLen = 0;
+						displayNameLen = 0;
 					}
-					const paddingLen = Math.max(2, firstColumnWidth - entryStartLen);
+					const paddingLen = Math.max(2, firstColumnWidth - displayNameLen);
 					stream.write(" ".repeat(paddingLen));
 
 					// Holds the length of the last line written, used later below.
-					let lastLineLen = entryStartLen + paddingLen;
+					let lastLineLen = displayNameLen + paddingLen;
 
-					// Add description.
+					// Print the description.
 					let hasDescription = false;
 					if (option.description) {
 						hasDescription = true;
@@ -275,7 +281,7 @@ export function printHelp(
 						}
 					}
 
-					// Add default value.
+					// Print the default value.
 					if (
 						option.default !== undefined &&
 						(option.type !== "boolean" ||
@@ -284,7 +290,7 @@ export function printHelp(
 					) {
 						const formattedDefault = JSON.stringify(option.default);
 						if (
-							// 11 = "(default: " + ")"
+							//            11 = ("(default: " + ")").length
 							lastLineLen + 11 + formattedDefault.length >
 							firstColumnWidth + secondColumnWidth
 						) {
