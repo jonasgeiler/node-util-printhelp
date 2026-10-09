@@ -1,5 +1,10 @@
+/********************************************/
+/*              TSConfig file               */
+/* https://www.typescriptlang.org/tsconfig/ */
+/********************************************/
+
 {
-	// Visit https://aka.ms/tsconfig to read more about this file
+	"$schema": "https://json.schemastore.org/tsconfig",
 	"include": [
 		"src"
 	],
@@ -23,6 +28,7 @@
 		"sourceMap": true,
 		"declaration": true,
 		"declarationMap": true,
+		"listEmittedFiles": true,
 
 		// Stricter Typechecking Options
 		"noUncheckedIndexedAccess": true,
@@ -35,9 +41,18 @@
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
 		"noPropertyAccessFromIndexSignature": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictBindCallApply": true,
+		"strictPropertyInitialization": true,
+		"strictBuiltinIteratorReturn": true,
+		"noImplicitThis": true,
+		"useUnknownInCatchVariables": true,
 
 		// Recommended Options
 		"strict": true,
+		"alwaysStrict": true,
 		"jsx": "react-jsx",
 		"verbatimModuleSyntax": true,
 		"isolatedModules": true,

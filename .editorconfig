@@ -16,7 +16,7 @@ max_line_length          = 80
 # Recommended but not forced:
 #tab_width               = 2
 
-[*.{json,yml,yaml,md}]
+[*.{yml,yaml,md}]
 indent_style = space
 indent_size  = 2
 
