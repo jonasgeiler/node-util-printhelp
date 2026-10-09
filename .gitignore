@@ -33,3 +33,6 @@ yarn-error.log*
 .pnpm-debug.log*
 .size-limit/
 esbuild-why-*
+
+# Output
+/dist/
