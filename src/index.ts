@@ -58,24 +58,38 @@ function formatColumnText(
 		.trimStart();
 }
 
-export interface ParseArgsAndHelpOptionDescriptor
+/**
+ * An extension of {@link ParseArgsOptionDescriptor} which allows setting
+ * a help text description used by {@link printHelp} for the option.
+ */
+export interface ParseArgsOptionDescriptorWithHelpText
 	extends ParseArgsOptionDescriptor {
 	description?: string | undefined;
 }
 
-export interface ParseArgsAndHelpOptionsConfig {
-	[longOption: string]: ParseArgsAndHelpOptionDescriptor;
+/**
+ * An adaption of {@link import("node:util").ParseArgsOptionsConfig} using our
+ * custom {@link ParseArgsOptionDescriptorWithHelpText} type as value.
+ */
+export interface ParseArgsOptionsConfigWithHelpText {
+	[longOption: string]: ParseArgsOptionDescriptorWithHelpText;
 }
 
-export interface ParseArgsAndHelpConfig extends ParseArgsConfig {
-	name?: string | undefined;
+/**
+ * An extension of {@link ParseArgsConfig} which allows setting help text
+ * information for {@link printHelp}.
+ */
+export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 	description?: string | undefined;
+	name?: string | undefined;
+	positionalsUsage?: string | undefined;
+	footer?: string | undefined;
 
-	options?: ParseArgsAndHelpOptionsConfig | undefined;
+	options?: ParseArgsOptionsConfigWithHelpText | undefined;
 }
 
 export function printHelp(
-	parseArgsConfig: ParseArgsAndHelpConfig,
+	parseArgsConfig: ParseArgsConfigWithHelpText,
 	stream: WriteStream = process.stdout,
 ) {
 	// Based on https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
@@ -91,11 +105,16 @@ export function printHelp(
 			stream.write(parseArgsConfig.description);
 			stream.write("\n\n");
 		}
+
 		let cliName = parseArgsConfig.name;
 		if (!cliName) {
 			cliName = deduceCLIName();
 		}
-		stream.write(bold(`Usage: ${cliName} [options]`));
+		let usage = `Usage: ${cliName} [options]`;
+		if (parseArgsConfig.positionalsUsage) {
+			usage += ` ${parseArgsConfig.positionalsUsage}`;
+		}
+		stream.write(bold(usage));
 		stream.write("\n");
 
 		if (parseArgsConfig.options) {
@@ -110,7 +129,7 @@ export function printHelp(
 						// (We mainly do this here for sorting the options properly)
 						return ["no-" + optionEntry[0], optionEntry[1]] as [
 							string,
-							ParseArgsAndHelpOptionDescriptor,
+							ParseArgsOptionDescriptorWithHelpText,
 						];
 					}
 					return optionEntry;
@@ -231,6 +250,12 @@ export function printHelp(
 
 				stream.write("\n");
 			}
+		}
+
+		if (parseArgsConfig.footer) {
+			stream.write("\n");
+			stream.write(parseArgsConfig.footer);
+			stream.write("\n");
 		}
 	} finally {
 		process.nextTick(() => stream.uncork());
