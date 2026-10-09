@@ -27,12 +27,12 @@ function deduceCLIName(): string {
 		(!!(process as ElectronProcess).versions.electron &&
 			!(process as ElectronProcess).defaultApp);
 	const cliName = basename(
-		process.argv[isEvalOrBundledElectronApp ? 0 : 1] || import.meta.filename,
+		process.argv[isEvalOrBundledElectronApp ? 0 : 1] || process.argv0,
 	);
 	if (cliName !== "node" && cliName !== "node.exe") {
 		return cliName;
 	}
-	return `${cliName} ${process.execArgv.join(" ")}`;
+	return process.argv.join(" ");
 }
 
 /**
