@@ -178,7 +178,7 @@ export function printHelp(
 			let firstColumnWidth = Math.floor(width * 0.4);
 			let maxFirstColumnUsed = 0;
 			for (const [optionLong, option] of sortedOptions) {
-				//                            4 = ("  " + "--").length
+				//                            4 == ("  " + "--").length
 				let firstColumnUsed = 4 + optionLong.length;
 				if (option.short) {
 					//                 3 == ("-" + ", ").length
@@ -264,7 +264,7 @@ export function printHelp(
 					) {
 						const formattedDefault = JSON.stringify(option.default);
 						if (
-							//            11 = ("(default: " + ")").length
+							//            11 == ("(default: " + ")").length
 							lastLineLen + 11 + formattedDefault.length >
 							firstColumnWidth + secondColumnWidth
 						) {
