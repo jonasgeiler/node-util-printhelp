@@ -1,19 +1,18 @@
-import type { ParseArgsConfig } from "node:util";
+import { basename } from "node:path";
 import * as process from "node:process";
-import { basename } from 'node:path';
+import type { WriteStream } from "node:tty";
+import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
 import { StringBuilder } from "./string-builder.ts";
-import type { ParseArgsOptionDescriptor } from "node:util";
-import type { WriteStream } from "node:tty";
 
 function indent(text: string, depth: number) {
-	return text.replace(/^/gm, ' '.repeat(depth));
+	return text.replace(/^/gm, " ".repeat(depth));
 }
 
 function fold(text: string, width: number) {
 	return text.replace(
-		new RegExp(`([^\n]{0,${width}})( |$)`, 'g'),
-		(_, newLine, end) => newLine + (end === ' ' ? '\n' : ''),
+		new RegExp(`([^\n]{0,${width}})( |$)`, "g"),
+		(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
 	);
 }
 
@@ -25,29 +24,37 @@ function getArgDescription(type: any) {
 		case "number":
 		case "string":
 		case "bigint":
-			return '...';
+			return "...";
 		default:
 			throw new Error(`Unknown option type ${type}`);
 	}
 	return "";
 }
 
-function formatColumnText(text: string, firstColumn: number, secondColumn: number) {
+function formatColumnText(
+	text: string,
+	firstColumn: number,
+	secondColumn: number,
+) {
 	// Combination of the indent and fold functions from:
 	// https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L93-L103
 	return text
 		.replace(
-			new RegExp(`([^\n]{0,${secondColumn}})( |$)`, 'g'),
-			(_, newLine, end) => newLine + (end === ' ' ? '\n' : ''),
+			new RegExp(`([^\n]{0,${secondColumn}})( |$)`, "g"),
+			(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
 		)
-		.replace(/^/gm, ' '.repeat(firstColumn))
+		.replace(/^/gm, " ".repeat(firstColumn))
 		.trimStart();
 }
 
-export function format(
-	{ options, aliases = new Map(), firstColumn, secondColumn, nameStyle = [] },
-) {
-	let text = '';
+export function format({
+	options,
+	aliases = new Map(),
+	firstColumn,
+	secondColumn,
+	nameStyle = [],
+}) {
+	let text = "";
 	let maxFirstColumnUsed = 0;
 
 	const sortedOptions = [...options.entries()].sort(
@@ -63,7 +70,8 @@ export function format(
 	);
 
 	for (const {
-		0: name, 1: { helpText, type, defaultIsTrue },
+		0: name,
+		1: { helpText, type, defaultIsTrue },
 	} of sortedOptions) {
 		if (!helpText) continue;
 
@@ -74,8 +82,7 @@ export function format(
 		}
 
 		const argDescription = getArgDescription(type);
-		if (argDescription)
-			displayName += `=${argDescription}`;
+		if (argDescription) displayName += `=${argDescription}`;
 
 		for (const { 0: from, 1: to } of aliases) {
 			// For cases like e.g. `-e, --eval`.
@@ -85,8 +92,9 @@ export function format(
 
 			// For cases like `--inspect-brk[=[host:]port]`.
 			const targetInfo = options.get(to[0]);
-			const targetArgDescription =
-				targetInfo ? getArgDescription(targetInfo.type) : '...';
+			const targetArgDescription = targetInfo
+				? getArgDescription(targetInfo.type)
+				: "...";
 			if (from === `${name}=`) {
 				displayName += `[=${targetArgDescription}]`;
 			} else if (from === `${name} <arg>`) {
@@ -94,16 +102,17 @@ export function format(
 			}
 		}
 
-		let displayHelpText = helpText;
+		const displayHelpText = helpText;
 
 		text += styleText(nameStyle, displayName, { stream: process.stdout });
 		maxFirstColumnUsed = Math.max(maxFirstColumnUsed, displayName.length);
 		if (displayName.length >= firstColumn)
-			text += '\n' + ' '.repeat(firstColumn);
-		else
-			text += ' '.repeat(firstColumn - displayName.length);
+			text += "\n" + " ".repeat(firstColumn);
+		else text += " ".repeat(firstColumn - displayName.length);
 
-		text += indent(fold(displayHelpText, secondColumn), firstColumn).trimStart() + '\n';
+		text +=
+			indent(fold(displayHelpText, secondColumn), firstColumn).trimStart() +
+			"\n";
 	}
 
 	if (maxFirstColumnUsed < firstColumn - 4) {
@@ -122,18 +131,21 @@ export function format(
 
 export function getCLIName(): string {
 	const isEval =
-		process.execArgv.includes('--eval') ||
-		process.execArgv.includes('-e') ||
-		process.execArgv.includes('--print') ||
-		process.execArgv.includes('-p');
-	const cliName = basename(process.argv[isEval ? 0 : 1] || import.meta.filename);
+		process.execArgv.includes("--eval") ||
+		process.execArgv.includes("-e") ||
+		process.execArgv.includes("--print") ||
+		process.execArgv.includes("-p");
+	const cliName = basename(
+		process.argv[isEval ? 0 : 1] || import.meta.filename,
+	);
 	if (cliName !== "node") {
 		return cliName;
 	}
-	return cliName + " " + process.execArgv.join(' ');
+	return cliName + " " + process.execArgv.join(" ");
 }
 
-export interface ParseArgsAndHelpOptionDescriptor extends ParseArgsOptionDescriptor {
+export interface ParseArgsAndHelpOptionDescriptor
+	extends ParseArgsOptionDescriptor {
 	description?: string;
 }
 
@@ -148,7 +160,10 @@ export interface ParseArgsAndHelpConfig extends ParseArgsConfig {
 	options?: ParseArgsAndHelpOptionsConfig | undefined;
 }
 
-export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelpConfig) {
+export function printHelp(
+	stream: WriteStream,
+	parseArgsConfig: ParseArgsAndHelpConfig,
+) {
 	// Based on https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 
 	const bold = (text: string) => styleText("bold", text, { stream });
@@ -173,12 +188,18 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 
 			let firstColumnWidth = Math.floor(width * 0.4);
 			let maxFirstColumnUsed = 0;
-			for (const [optionLong, option] of Object.entries(parseArgsConfig.options)) {
+			for (const [optionLong, option] of Object.entries(
+				parseArgsConfig.options,
+			)) {
 				let firstColumnUsed = 4 + optionLong.length; // 4 = "  " + "--"
 				if (option.short) {
 					firstColumnUsed += 3 + option.short.length; // 3 = "-" + ", "
 				}
-				if (parseArgsConfig.allowNegative && option.type === "boolean" && option.default === true) {
+				if (
+					parseArgsConfig.allowNegative &&
+					option.type === "boolean" &&
+					option.default === true
+				) {
 					firstColumnUsed += 3; // 3 = "no-"
 				}
 				if (option.type === "string") {
@@ -194,8 +215,9 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 			}
 
 			const secondColumnWidth = Math.floor(width * 0.57);
-			for (const [optionLong, option] of
-				Object.entries(parseArgsConfig.options)) {
+			for (const [optionLong, option] of Object.entries(
+				parseArgsConfig.options,
+			)) {
 				const entryStart = new StringBuilder();
 				entryStart.write("  ");
 
@@ -206,7 +228,11 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 					entryStart.write(", ");
 				}
 				entryStart.write("--");
-				if (parseArgsConfig.allowNegative && option.type === "boolean" && option.default === true) {
+				if (
+					parseArgsConfig.allowNegative &&
+					option.type === "boolean" &&
+					option.default === true
+				) {
 					entryStart.write("no-");
 				}
 				entryStart.write(optionLong);
@@ -236,7 +262,11 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 					if (option.description) {
 						hasDescription = true;
 
-						const formattedDescription = formatColumnText(option.description, firstColumnWidth, secondColumnWidth);
+						const formattedDescription = formatColumnText(
+							option.description,
+							firstColumnWidth,
+							secondColumnWidth,
+						);
 						stream.write(formattedDescription);
 
 						const descLines = formattedDescription.split("\n");
@@ -253,14 +283,16 @@ export function printHelp(stream: WriteStream, parseArgsConfig: ParseArgsAndHelp
 					// Add default value.
 					if (
 						option.default !== undefined &&
-						(
-							option.type !== "boolean" ||
+						(option.type !== "boolean" ||
 							// Don't show redundant default for boolean options.
-							(!parseArgsConfig.allowNegative && option.default !== false)
-						)
+							(!parseArgsConfig.allowNegative && option.default !== false))
 					) {
 						const formattedDefault = JSON.stringify(option.default);
-						if (lastLineLen + 11 + formattedDefault.length > firstColumnWidth + secondColumnWidth) { // 11 = "(default: " + ")"
+						if (
+							// 11 = "(default: " + ")"
+							lastLineLen + 11 + formattedDefault.length >
+							firstColumnWidth + secondColumnWidth
+						) {
 							// Last line does not fit the default info, so wrap to next line.
 							stream.write("\n");
 							stream.write(" ".repeat(firstColumnWidth));
