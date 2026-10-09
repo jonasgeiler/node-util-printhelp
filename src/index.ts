@@ -107,11 +107,13 @@ export function printHelp(
 	stream.cork();
 
 	try {
+		// Print optional CLI description.
 		if (parseArgsConfig.description) {
 			stream.write(wrapText(parseArgsConfig.description, width));
 			stream.write("\n\n");
 		}
 
+		// Print CLI usage string.
 		let cliName = parseArgsConfig.name;
 		if (!cliName) {
 			cliName = deduceCLIName();
@@ -257,12 +259,14 @@ export function printHelp(
 			}
 		}
 
+		// Print optional CLI footer.
 		if (parseArgsConfig.footer) {
 			stream.write("\n");
 			stream.write(wrapText(parseArgsConfig.footer, width));
 			stream.write("\n");
 		}
 	} finally {
+		// Node.js recommends using `process.nextTick` for calling `stream.uncork`.
 		process.nextTick(() => stream.uncork());
 	}
 }

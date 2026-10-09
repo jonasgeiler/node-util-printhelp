@@ -1,13 +1,13 @@
 {
-	"name": "util.parseargs-help-generator",
+	"name": "node-util-printhelp",
 	"version": "0.0.0",
-	"description": "Generate CLI help text from a Node.js `util.parseArgs` configuration.",
-	"homepage": "https://github.com/jonasgeiler/util.parseargs-help-generator#readme",
-	"bugs": "https://github.com/jonasgeiler/util.parseargs-help-generator/issues",
+	"description": "Utility to generate and print CLI help text from a Node.js `util.parseArgs` configuration, designed minimally to resemble a potential future Node.js built-in.",
+	"homepage": "https://github.com/jonasgeiler/node-util-printhelp#readme",
+	"bugs": "https://github.com/jonasgeiler/node-util-printhelp/issues",
 	"license": "MIT",
 	"author": "Jonas Geiler <npm@jonasgeiler.com> (https://jonasgeiler.com)",
 	"funding": "https://github.com/sponsors/jonasgeiler",
-	"repository": "github:jonasgeiler/util.parseargs-help-generator",
+	"repository": "github:jonasgeiler/node-util-printhelp",
 	"scripts": {
 		"prepare": "git config core.hooksPath .githooks",
 		"dev": "pnpm run build --watch",
@@ -40,6 +40,21 @@
 		"./package.json": "./package.json"
 	},
 	"keywords": [
-		"TODO"
+		"util.parseArgs",
+		"arguments",
+		"cli",
+		"generator",
+		"help",
+		"node",
+		"node-util",
+		"node:util",
+		"options",
+		"parse",
+		"parseArgs",
+		"print",
+		"printer",
+		"util",
+		"utilities",
+		"utils"
 	]
 }
