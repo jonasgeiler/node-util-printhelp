@@ -32,7 +32,7 @@ function deduceCLIName(): string {
 	if (cliName !== "node" && cliName !== "node.exe") {
 		return cliName;
 	}
-	return cliName + " " + process.execArgv.join(" ");
+	return `${cliName} ${process.execArgv.join(" ")}`;
 }
 
 /**
@@ -134,7 +134,7 @@ export function printHelp(
 					) {
 						// Prepend "no-" to long option name, since it's the only usage way.
 						// (We mainly do this here for sorting the options properly)
-						return ["no-" + optionEntry[0], optionEntry[1]] as [
+						return [`no-${optionEntry[0]}`, optionEntry[1]] as [
 							string,
 							ParseArgsOptionDescriptorWithHelpText,
 						];
@@ -217,9 +217,11 @@ export function printHelp(
 						const descLinesLen = descLines.length;
 						if (descLinesLen > 1) {
 							// Description has been wrapped, so set new last line length.
+							// biome-ignore lint/style/noNonNullAssertion: Safe here.
 							lastLineLen = descLines[descLinesLen - 1]!.length;
 						} else if (descLinesLen === 1) {
 							// Just add the only description line to last line length.
+							// biome-ignore lint/style/noNonNullAssertion: Safe here.
 							lastLineLen += descLines[descLinesLen - 1]!.length;
 						}
 					}
