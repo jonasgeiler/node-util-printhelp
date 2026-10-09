@@ -128,7 +128,7 @@ export function format({
 	return text;
 }
 
-export function getCLIName(): string {
+function getCLIName(): string {
 	const isEval =
 		process.execArgv.includes("--eval") ||
 		process.execArgv.includes("-e") ||
@@ -145,7 +145,7 @@ export function getCLIName(): string {
 
 export interface ParseArgsAndHelpOptionDescriptor
 	extends ParseArgsOptionDescriptor {
-	description?: string;
+	description?: string | undefined;
 }
 
 export interface ParseArgsAndHelpOptionsConfig {
@@ -153,8 +153,8 @@ export interface ParseArgsAndHelpOptionsConfig {
 }
 
 export interface ParseArgsAndHelpConfig extends ParseArgsConfig {
-	name: string;
-	description?: string;
+	name?: string | undefined;
+	description?: string | undefined;
 
 	options?: ParseArgsAndHelpOptionsConfig | undefined;
 }
@@ -175,8 +175,12 @@ export function printHelp(
 			stream.write(parseArgsConfig.description);
 			stream.write("\n\n");
 		}
-		stream.write(bold(`Usage: ${parseArgsConfig.name} [options]`));
-		stream.write("\n\n");
+		let cliName = parseArgsConfig.name;
+		if (!cliName) {
+			cliName = getCLIName();
+		}
+		stream.write(bold(`Usage: ${cliName} [options]`));
+		stream.write("\n");
 
 		if (parseArgsConfig.options) {
 			const sortedOptions = Object.entries(parseArgsConfig.options)
@@ -228,6 +232,7 @@ export function printHelp(
 			}
 
 			// Print the options.
+			stream.write("\n");
 			stream.write(bold("Options:"));
 			stream.write("\n");
 			for (const [optionLong, option] of sortedOptions) {
