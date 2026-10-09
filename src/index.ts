@@ -4,32 +4,33 @@ import type { WriteStream } from "node:tty";
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
 
-function indent(text: string, depth: number) {
-	return text.replace(/^/gm, " ".repeat(depth));
-}
-
-function fold(text: string, width: number) {
-	return text.replace(
-		new RegExp(`([^\n]{0,${width}})( |$)`, "g"),
-		(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
+/**
+ * Deduce the name of the running CLI from the process args/metadata.
+ */
+function deduceCLIName(): string {
+	// Knowledge about --eval/--print from:
+	// https://github.com/nodejs/node/blob/dd9777b284b05a0c4864ae9543e0b4d2020721db/lib/internal/util/parse_args/parse_args.js#L58-L67
+	const isEval =
+		process.execArgv.includes("--eval") ||
+		process.execArgv.includes("-e") ||
+		process.execArgv.includes("--print") ||
+		process.execArgv.includes("-p");
+	const cliName = basename(
+		process.argv[isEval ? 0 : 1] || import.meta.filename,
 	);
-}
-
-function getArgDescription(type: any) {
-	switch (typeof type) {
-		case "boolean":
-		case "undefined":
-			break;
-		case "number":
-		case "string":
-		case "bigint":
-			return "...";
-		default:
-			throw new Error(`Unknown option type ${type}`);
+	if (cliName !== "node" && cliName !== "node.exe") {
+		return cliName;
 	}
-	return "";
+	return cliName + " " + process.execArgv.join(" ");
 }
 
+/**
+ * Format text to start indented at `firstColumn` and wrapped at `secondColumn`.
+ * The first line is not indented.
+ * @param text
+ * @param firstColumn
+ * @param secondColumn
+ */
 function formatColumnText(
 	text: string,
 	firstColumn: number,
@@ -44,103 +45,6 @@ function formatColumnText(
 		)
 		.replace(/^/gm, " ".repeat(firstColumn))
 		.trimStart();
-}
-
-export function format({
-	options,
-	aliases = new Map(),
-	firstColumn,
-	secondColumn,
-	nameStyle = [],
-}) {
-	let text = "";
-	let maxFirstColumnUsed = 0;
-
-	const sortedOptions = [...options.entries()].sort(
-		({ 0: name1, 1: option1 }, { 0: name2, 1: option2 }) => {
-			if (option1.defaultIsTrue) {
-				name1 = `--no-${name1.slice(2)}`;
-			}
-			if (option2.defaultIsTrue) {
-				name2 = `--no-${name2.slice(2)}`;
-			}
-			return name1.localeCompare(name2);
-		},
-	);
-
-	for (const {
-		0: name,
-		1: { helpText, type, defaultIsTrue },
-	} of sortedOptions) {
-		if (!helpText) continue;
-
-		let displayName = name;
-
-		if (defaultIsTrue) {
-			displayName = `--no-${displayName.slice(2)}`;
-		}
-
-		const argDescription = getArgDescription(type);
-		if (argDescription) displayName += `=${argDescription}`;
-
-		for (const { 0: from, 1: to } of aliases) {
-			// For cases like e.g. `-e, --eval`.
-			if (to[0] === name && to.length === 1) {
-				displayName = `${from}, ${displayName}`;
-			}
-
-			// For cases like `--inspect-brk[=[host:]port]`.
-			const targetInfo = options.get(to[0]);
-			const targetArgDescription = targetInfo
-				? getArgDescription(targetInfo.type)
-				: "...";
-			if (from === `${name}=`) {
-				displayName += `[=${targetArgDescription}]`;
-			} else if (from === `${name} <arg>`) {
-				displayName += ` [${targetArgDescription}]`;
-			}
-		}
-
-		const displayHelpText = helpText;
-
-		text += styleText(nameStyle, displayName, { stream: process.stdout });
-		maxFirstColumnUsed = Math.max(maxFirstColumnUsed, displayName.length);
-		if (displayName.length >= firstColumn)
-			text += "\n" + " ".repeat(firstColumn);
-		else text += " ".repeat(firstColumn - displayName.length);
-
-		text +=
-			indent(fold(displayHelpText, secondColumn), firstColumn).trimStart() +
-			"\n";
-	}
-
-	if (maxFirstColumnUsed < firstColumn - 4) {
-		// If we have more than 4 blank gap spaces, reduce first column width.
-		return format({
-			options,
-			aliases,
-			firstColumn: maxFirstColumnUsed + 2,
-			secondColumn,
-			nameStyle,
-		});
-	}
-
-	return text;
-}
-
-function getCLIName(): string {
-	const isEval =
-		process.execArgv.includes("--eval") ||
-		process.execArgv.includes("-e") ||
-		process.execArgv.includes("--print") ||
-		process.execArgv.includes("-p");
-	const cliName = basename(
-		process.argv[isEval ? 0 : 1] || import.meta.filename,
-	);
-	if (cliName !== "node") {
-		return cliName;
-	}
-	return cliName + " " + process.execArgv.join(" ");
 }
 
 export interface ParseArgsAndHelpOptionDescriptor
@@ -166,7 +70,8 @@ export function printHelp(
 	// Based on https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 
 	const bold = (text: string) => styleText("bold", text, { stream });
-	const green = (text: string) => styleText("green", text, { stream });
+	const boldGreen = (text: string) =>
+		styleText(["bold", "green"], text, { stream });
 
 	stream.cork();
 
@@ -177,7 +82,7 @@ export function printHelp(
 		}
 		let cliName = parseArgsConfig.name;
 		if (!cliName) {
-			cliName = getCLIName();
+			cliName = deduceCLIName();
 		}
 		stream.write(bold(`Usage: ${cliName} [options]`));
 		stream.write("\n");
@@ -247,7 +152,7 @@ export function printHelp(
 				}
 
 				// Print the display name with its styling.
-				stream.write(bold(green(displayName)));
+				stream.write(boldGreen(displayName));
 
 				if (option.description || option.default !== undefined) {
 					// Print a padding.
