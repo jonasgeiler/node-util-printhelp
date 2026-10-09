@@ -1,8 +1,15 @@
 import { basename } from "node:path";
-import * as process from "node:process";
 import type { WriteStream } from "node:tty";
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
+
+/** Used to detect a bundled Electron app while deducing CLI name. */
+interface ElectronProcess extends NodeJS.Process {
+	defaultApp?: boolean;
+	versions: NodeJS.ProcessVersions & {
+		electron: string;
+	};
+}
 
 /**
  * Deduce the name of the running CLI from the process args/metadata.
@@ -10,13 +17,17 @@ import { styleText } from "node:util";
 function deduceCLIName(): string {
 	// Knowledge about --eval/--print from:
 	// https://github.com/nodejs/node/blob/dd9777b284b05a0c4864ae9543e0b4d2020721db/lib/internal/util/parse_args/parse_args.js#L58-L67
-	const isEval =
+	// Knowledge about Electron from:
+	// https://github.com/yargs/yargs/blob/b2dbcc538062829bd720f8cbfb6b4765bae6b4b8/lib/utils/process-argv.ts
+	const isEvalOrBundledElectronApp =
 		process.execArgv.includes("--eval") ||
 		process.execArgv.includes("-e") ||
 		process.execArgv.includes("--print") ||
-		process.execArgv.includes("-p");
+		process.execArgv.includes("-p") ||
+		(!!(process as ElectronProcess).versions.electron &&
+			!(process as ElectronProcess).defaultApp);
 	const cliName = basename(
-		process.argv[isEval ? 0 : 1] || import.meta.filename,
+		process.argv[isEvalOrBundledElectronApp ? 0 : 1] || import.meta.filename,
 	);
 	if (cliName !== "node" && cliName !== "node.exe") {
 		return cliName;
