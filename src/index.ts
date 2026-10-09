@@ -160,8 +160,8 @@ export interface ParseArgsAndHelpConfig extends ParseArgsConfig {
 }
 
 export function printHelp(
-	stream: WriteStream,
 	parseArgsConfig: ParseArgsAndHelpConfig,
+	stream: WriteStream = process.stdout,
 ) {
 	// Based on https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 
