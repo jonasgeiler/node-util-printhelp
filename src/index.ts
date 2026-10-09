@@ -36,26 +36,26 @@ function deduceCLIName(): string {
 }
 
 /**
- * Format text to start indented at `firstColumn` and wrapped at `secondColumn`.
- * The first line is not indented.
+ * Wrap text with newlines after full words exceeding given max width.
  * @param text
- * @param firstColumn
- * @param secondColumn
+ * @param maxWidth
  */
-function formatColumnText(
-	text: string,
-	firstColumn: number,
-	secondColumn: number,
-) {
-	// Combination of the indent and fold functions from:
-	// https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L93-L103
-	return text
-		.replace(
-			new RegExp(`([^\n]{0,${secondColumn}})( |$)`, "g"),
-			(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
-		)
-		.replace(/^/gm, " ".repeat(firstColumn))
-		.trimStart();
+function wrapText(text: string, maxWidth: number) {
+	// Adapted from: https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L97-L103
+	return text.replace(
+		new RegExp(`([^\n]{0,${maxWidth}})( |$)`, "g"),
+		(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
+	);
+}
+
+/**
+ * Ident text width spaces to make it start at given depth.
+ * @param text
+ * @param depth
+ */
+function indentText(text: string, depth: number) {
+	// Adapted from: https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L93-L95
+	return text.replace(/^/gm, " ".repeat(depth));
 }
 
 /**
@@ -94,15 +94,21 @@ export function printHelp(
 ) {
 	// Based on https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 
+	// Use 75 % of the available TTY width, and at least 70 characters.
+	const width = Math.max(70, (stream.columns || 0) * 0.75);
+
+	// Text styling helpers for the given TTY stream.
 	const bold = (text: string) => styleText("bold", text, { stream });
 	const boldGreen = (text: string) =>
 		styleText(["bold", "green"], text, { stream });
 
+	// Buffer/batch stream writes, since we do a lot of smaller ones.
+	// The help text is only printed once `stream.uncork()` is called below.
 	stream.cork();
 
 	try {
 		if (parseArgsConfig.description) {
-			stream.write(parseArgsConfig.description);
+			stream.write(wrapText(parseArgsConfig.description, width));
 			stream.write("\n\n");
 		}
 
@@ -118,6 +124,7 @@ export function printHelp(
 		stream.write("\n");
 
 		if (parseArgsConfig.options) {
+			// Pre-process and sort configured options.
 			const sortedOptions = Object.entries(parseArgsConfig.options)
 				.map((optionEntry) => {
 					if (
@@ -137,10 +144,6 @@ export function printHelp(
 				.sort(([option1Long], [option2Long]) =>
 					option1Long.localeCompare(option2Long),
 				);
-
-			// Use 75 % of the available width, and at least 70 characters.
-			const width = Math.max(70, (stream.columns || 0) * 0.75);
-			const secondColumnWidth = Math.floor(width * 0.57);
 
 			// Calculate optimal first column width.
 			let firstColumnWidth = Math.floor(width * 0.4);
@@ -170,6 +173,7 @@ export function printHelp(
 			stream.write("\n");
 			stream.write(bold("Options:"));
 			stream.write("\n");
+			const secondColumnWidth = Math.floor(width * 0.57);
 			for (const [optionLong, option] of sortedOptions) {
 				// Build display name of the option.
 				let displayName = "  ";
@@ -203,11 +207,10 @@ export function printHelp(
 					if (option.description) {
 						hasDescription = true;
 
-						const formattedDescription = formatColumnText(
-							option.description,
+						const formattedDescription = indentText(
+							wrapText(option.description, secondColumnWidth),
 							firstColumnWidth,
-							secondColumnWidth,
-						);
+						).trimStart();
 						stream.write(formattedDescription);
 
 						const descLines = formattedDescription.split("\n");
@@ -254,7 +257,7 @@ export function printHelp(
 
 		if (parseArgsConfig.footer) {
 			stream.write("\n");
-			stream.write(parseArgsConfig.footer);
+			stream.write(wrapText(parseArgsConfig.footer, width));
 			stream.write("\n");
 		}
 	} finally {
