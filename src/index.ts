@@ -1,62 +1,9 @@
-import { basename } from "node:path";
 import type { WriteStream } from "node:tty";
+// noinspection ES6UnusedImports
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
-
-/** Used to detect a bundled Electron app while deducing CLI name. */
-interface ElectronProcess extends NodeJS.Process {
-	defaultApp?: boolean;
-	versions: NodeJS.ProcessVersions & {
-		electron: string;
-	};
-}
-
-/**
- * Deduce the name of the running CLI from the process args/metadata.
- */
-function deduceCLIName(): string {
-	// Knowledge about --eval/--print from:
-	// https://github.com/nodejs/node/blob/dd9777b284b05a0c4864ae9543e0b4d2020721db/lib/internal/util/parse_args/parse_args.js#L58-L67
-	// Knowledge about Electron from:
-	// https://github.com/yargs/yargs/blob/b2dbcc538062829bd720f8cbfb6b4765bae6b4b8/lib/utils/process-argv.ts
-	const isEvalOrBundledElectronApp =
-		process.execArgv.includes("--eval") ||
-		process.execArgv.includes("-e") ||
-		process.execArgv.includes("--print") ||
-		process.execArgv.includes("-p") ||
-		(!!(process as ElectronProcess).versions.electron &&
-			!(process as ElectronProcess).defaultApp);
-	const cliName = basename(
-		process.argv[isEvalOrBundledElectronApp ? 0 : 1] || process.argv0,
-	);
-	if (cliName !== "node" && cliName !== "node.exe") {
-		return cliName;
-	}
-	return process.argv.join(" ");
-}
-
-/**
- * Wrap text with newlines after full words exceeding given max width.
- * @param text
- * @param maxWidth
- */
-function wrapText(text: string, maxWidth: number) {
-	// Adapted from: https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L97-L103
-	return text.replace(
-		new RegExp(`([^\n]{0,${maxWidth}})( |$)`, "g"),
-		(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
-	);
-}
-
-/**
- * Ident text width spaces to make it start at given depth.
- * @param text
- * @param depth
- */
-function indentText(text: string, depth: number) {
-	// Adapted from: https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L93-L95
-	return text.replace(/^/gm, " ".repeat(depth));
-}
+import { deduceCLIName } from "./argv-utils.js";
+import { indentText, wrapText } from "./text-utils.js";
 
 /**
  * An extension of {@link ParseArgsOptionDescriptor} which allows setting

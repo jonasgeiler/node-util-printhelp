@@ -16,13 +16,16 @@
 		// Environment Settings
 		// See also https://aka.ms/tsconfig/module
 		"module": "nodenext",
-		"target": "es2022",
+		"target": "esnext",
 		"lib": [
-			"es2023"
+			"esnext"
 		],
 		"types": [
 			"node"
 		],
+
+		// Node.js Type Stripping Support
+		"erasableSyntaxOnly": true,
 
 		// Other Outputs
 		"sourceMap": true,
@@ -59,6 +62,9 @@
 		"noUncheckedSideEffectImports": true,
 		"moduleDetection": "force",
 		"moduleResolution": "node16",
-		"skipLibCheck": true
+		"skipLibCheck": true,
+
+		// Additional Options
+		"forceConsistentCasingInFileNames": true
 	}
 }
