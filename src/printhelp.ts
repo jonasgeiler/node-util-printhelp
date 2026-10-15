@@ -67,7 +67,8 @@ export function printHelp(
 	parseArgsConfig: ParseArgsConfigWithHelpText,
 	stream: WriteStream = process.stdout,
 ) {
-	// Based on https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
+	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
+	// With some learnings from: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/util/parse_args/parse_args.js
 
 	// Use 75 % of the available TTY width, and at least 70 characters.
 	const width = Math.max(70, (stream.columns || 0) * 0.75);

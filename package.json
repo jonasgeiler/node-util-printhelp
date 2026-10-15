@@ -30,7 +30,7 @@
 		"dev": "pnpm run build --watch",
 		"check": "pnpm run '/^check:.*/'",
 		"check:biome": "biome check",
-		"check:test": "node --test --experimental-test-coverage",
+		"check:test": "node --test --experimental-test-coverage test/**/*.test.ts",
 		"check:tsc": "tsc --noEmit",
 		"fix": "biome check --fix",
 		"unsafe-fix": "biome check --unsafe --fix",
