@@ -3,9 +3,7 @@
 	"name": "@jonasgeiler/node-util-printhelp",
 	"version": "0.0.3",
 	"license": "MIT",
-	"exports": {
-		".": "./src/printhelp.ts"
-	},
+	"exports": "./src/printhelp.ts",
 	"publish": {
 		"include": [
 			"README.md",
