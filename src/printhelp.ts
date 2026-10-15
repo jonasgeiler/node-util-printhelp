@@ -70,8 +70,13 @@ export function printHelp(
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 	// With some learnings from: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/util/parse_args/parse_args.js
 
+	// Get TTY width, respecting the `COLUMNS` environment variable if it exists.
 	// Use 75 % of the available TTY width, and at least 70 characters.
-	const width = Math.max(70, (stream.columns || 0) * 0.75);
+	let columns = Number(process.env.COLUMNS);
+	if (!Number.isSafeInteger(columns) || columns <= 0) {
+		columns = stream.columns || 1;
+	}
+	const width = Math.max(70, columns * 0.75);
 
 	// Text styling helpers for the given TTY stream.
 	const bold = (text: string) => styleText("bold", text, { stream });
