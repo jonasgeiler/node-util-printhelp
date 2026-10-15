@@ -2,8 +2,8 @@ import type { WriteStream } from "node:tty";
 // noinspection ES6UnusedImports
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
-import { deduceCLIName } from "./argv-utils.js";
-import { indentText, wrapText } from "./text-utils.js";
+import { deduceCLIName } from "./argv-utils.ts";
+import { indentText, wrapText } from "./text-utils.ts";
 
 /**
  * An extension of {@link ParseArgsOptionDescriptor} which allows setting

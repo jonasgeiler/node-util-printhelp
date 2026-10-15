@@ -26,6 +26,7 @@
 
 		// Node.js Type Stripping Support
 		"erasableSyntaxOnly": true,
+		"rewriteRelativeImportExtensions": true,
 
 		// Other Outputs
 		"sourceMap": true,

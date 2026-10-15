@@ -28,7 +28,10 @@
 	"scripts": {
 		"prepare": "git config core.hooksPath .githooks",
 		"dev": "pnpm run build --watch",
-		"check": "biome check",
+		"check": "pnpm run '/^check:.*/'",
+		"check:biome": "biome check",
+		"check:test": "node --test --experimental-test-coverage",
+		"check:tsc": "tsc --noEmit",
 		"fix": "biome check --fix",
 		"unsafe-fix": "biome check --unsafe --fix",
 		"prebuild": "node --eval='require(`fs`).rmSync(`dist`,{recursive:true,force:true})'",
@@ -45,8 +48,8 @@
 	],
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
+			"types": "./dist/printhelp.d.ts",
+			"default": "./dist/printhelp.js"
 		},
 		"./package.json": "./package.json"
 	},

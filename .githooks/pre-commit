@@ -7,4 +7,4 @@ set -euo pipefail -x
 
 export PATH="node_modules/.bin:${PATH}"
 
-biome check --staged --no-errors-on-unmatched
+pnpm run check
