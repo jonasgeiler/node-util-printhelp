@@ -3,7 +3,7 @@ import type { WriteStream } from "node:tty";
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
 import { deduceCLIName } from "./argv-utils.ts";
-import { isValidParseArgsConfigOptions } from "./config-utils.ts";
+import { isNonEmptyObject } from "./object-utils.ts";
 import { indentText, wrapText } from "./text-utils.ts";
 
 /**
@@ -100,7 +100,7 @@ export function printHelp(
 		stream.write(bold(usage));
 		stream.write("\n");
 
-		if (isValidParseArgsConfigOptions(parseArgsConfig.options)) {
+		if (isNonEmptyObject(parseArgsConfig.options)) {
 			// Pre-process and sort configured options.
 			const sortedOptions = Object.entries(parseArgsConfig.options)
 				.map((optionEntry) => {
