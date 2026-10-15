@@ -41,6 +41,9 @@ jobs:
           cache: false
           require-lockfile: true
 
+      - name: Publish package to JSR
+        run: pnx jsr publish
+
       - name: Replace GitHub-flavored Markdown alerts with standard Markdown
         run: sed -i 's/^> *\[\!\([a-zA-Z]\)\([a-zA-Z]*\)\] */> **\U\1\L\2**  /g' ./*.md
         # Basically replaces:
