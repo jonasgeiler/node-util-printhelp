@@ -7,6 +7,8 @@
 [![JSR score badge](https://jsr.io/badges/@jonasgeiler/node-util-printhelp/score?style=for-the-badge&label=Score&logoColor=fff&labelColor=333&color=e8e8e8&cacheSeconds=86400)][package-on-jsr]
 [![Minified size (gzip) badge](https://img.shields.io/bundlejs/size/node-util-printhelp?style=for-the-badge&labelColor=333&color=5fa04e&cacheSeconds=86400)][package-on-bundlejs]
 
+![Example Help Text Screenshot](./.github/assets/example-help-text.svg)
+
 Work in progress - please wait for version `1.0.0`.
 
 [`util.parseArgs`]: https://nodejs.org/api/util.html#utilparseargsconfig
