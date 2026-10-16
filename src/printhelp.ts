@@ -58,14 +58,26 @@ export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 }
 
 /**
+ * Options for {@link printHelp}.
+ */
+export interface PrintHelpOptions {
+	/**
+	 * A TTY stream where the help text will be printed to.
+	 * Also used to validate if colors can be used and how many columns the
+	 * help text can be wide.
+	 */
+	stream?: WriteStream;
+}
+
+/**
  * Print help text for the given `util.parseArgs` configuration, formatted
  * for the given TTY stream.
  * @param parseArgsConfig
- * @param stream
+ * @param options
  */
 export function printHelp(
 	parseArgsConfig: ParseArgsConfigWithHelpText,
-	stream: WriteStream = process.stdout,
+	{ stream = process.stdout }: PrintHelpOptions = {},
 ) {
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 	// With some learnings from: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/util/parse_args/parse_args.js

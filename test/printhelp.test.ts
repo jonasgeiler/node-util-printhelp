@@ -61,7 +61,7 @@ describe("printHelp", () => {
 				},
 				footer: "More information is available in the manual.",
 			},
-			captured.stream,
+			{ stream: captured.stream },
 		);
 		await waitForUncork();
 
@@ -94,7 +94,7 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			captured.stream,
+			{ stream: captured.stream },
 		);
 		await waitForUncork();
 
@@ -122,7 +122,7 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			captured.stream,
+			{ stream: captured.stream },
 		);
 		await waitForUncork();
 
@@ -145,7 +145,7 @@ describe("printHelp", () => {
 				name: "tool",
 				footer: "Documentation can be found at https://tool.com/",
 			},
-			captured.stream,
+			{ stream: captured.stream },
 		);
 		await waitForUncork();
 
@@ -160,7 +160,7 @@ describe("printHelp", () => {
 	it("skips printing an options header if options is an empty object", async () => {
 		const captured = createCapturedStream();
 
-		printHelp({ name: "tool", options: {} }, captured.stream);
+		printHelp({ name: "tool", options: {} }, { stream: captured.stream });
 		await waitForUncork();
 
 		assert.equal(withoutAnsi(captured.getOutput()), "Usage: tool [options]\n");
@@ -179,7 +179,7 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			captured.stream,
+			{ stream: captured.stream },
 		);
 		await waitForUncork();
 
@@ -206,7 +206,7 @@ describe("printHelp", () => {
 					enabled: { type: "boolean", default: true },
 				},
 			},
-			captured.stream,
+			{ stream: captured.stream },
 		);
 		await waitForUncork();
 
@@ -226,7 +226,7 @@ describe("printHelp", () => {
 		const captured = createCapturedStream();
 		t.mock.property(process, "argv", ["/usr/bin/node", "/tmp/example-cli.js"]);
 
-		printHelp({}, captured.stream);
+		printHelp({}, { stream: captured.stream });
 		await waitForUncork();
 
 		assert.equal(
