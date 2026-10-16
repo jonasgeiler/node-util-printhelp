@@ -46,6 +46,7 @@ describe("wrapText", () => {
 
 	it("preserves existing newlines", () => {
 		assert.equal(wrapText("one\ntwo three", 15), "one\ntwo three");
+		assert.equal(wrapText("one two\nthree four", 20), "one two\nthree four");
 	});
 
 	it("handles empty text", () => {

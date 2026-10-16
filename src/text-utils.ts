@@ -16,7 +16,7 @@ export function indentText(text: string, depth: number) {
 export function wrapText(text: string, maxWidth: number) {
 	// Adapted from: https://github.com/nodejs/node/blob/342bf6d66940f8c72a6a36bef44d7010d6b347b1/lib/internal/main/print_help.js#L97-L103
 	return text.replace(
-		new RegExp(`([^\n]{0,${maxWidth}})( |$)`, "g"),
+		new RegExp(`([^\n]{0,${maxWidth}})( |$)`, "gm"),
 		(_, newLine, end) => newLine + (end === " " ? "\n" : ""),
 	);
 }
