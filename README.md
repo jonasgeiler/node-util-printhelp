@@ -280,7 +280,7 @@ framework, such as [`yargs`][], [`commander.js`][] or [`oclif`][].
 [`<Object>`]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 [`<string>`]: https://developer.mozilla.org/docs/Web/JavaScript/Data_structures#string_type
 [`<tty.WriteStream>`]: https://nodejs.org/api/tty.html#class-ttywritestream
-[`yargs`]: https://github.com/yargs/yargs
+[`yargs`]: https://yargs.js.org/
 [`commander.js`]: https://github.com/tj/commander.js
 [`oclif`]: https://oclif.io/
 [latest-release]: https://github.com/jonasgeiler/node-util-printhelp/releases/latest
