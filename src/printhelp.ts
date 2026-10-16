@@ -72,11 +72,11 @@ export interface PrintHelpOptions {
 /**
  * Print help text for the given `util.parseArgs` configuration, formatted
  * for the given TTY stream.
- * @param parseArgsConfig
+ * @param config
  * @param options
  */
 export function printHelp(
-	parseArgsConfig: ParseArgsConfigWithHelpText,
+	config: ParseArgsConfigWithHelpText,
 	{ stream = process.stdout }: PrintHelpOptions = {},
 ) {
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
@@ -101,29 +101,29 @@ export function printHelp(
 
 	try {
 		// Print optional CLI description.
-		if (parseArgsConfig.description) {
-			stream.write(wrapText(parseArgsConfig.description, width));
+		if (config.description) {
+			stream.write(wrapText(config.description, width));
 			stream.write("\n\n");
 		}
 
 		// Print CLI usage string.
-		let cliName = parseArgsConfig.name;
+		let cliName = config.name;
 		if (!cliName) {
 			cliName = deduceCLIName();
 		}
 		let usage = `Usage: ${cliName} [options]`;
-		if (parseArgsConfig.positionalsUsage) {
-			usage += ` ${parseArgsConfig.positionalsUsage}`;
+		if (config.positionalsUsage) {
+			usage += ` ${config.positionalsUsage}`;
 		}
 		stream.write(bold(usage));
 		stream.write("\n");
 
-		if (isNonEmptyObject(parseArgsConfig.options)) {
+		if (isNonEmptyObject(config.options)) {
 			// Pre-process and sort configured options.
-			const sortedOptions = Object.entries(parseArgsConfig.options)
+			const sortedOptions = Object.entries(config.options)
 				.map((optionEntry) => {
 					if (
-						parseArgsConfig.allowNegative &&
+						config.allowNegative &&
 						optionEntry[1].type === "boolean" &&
 						optionEntry[1].default === true
 					) {
@@ -226,7 +226,7 @@ export function printHelp(
 						option.default !== undefined &&
 						(option.type !== "boolean" ||
 							// Don't show redundant default for boolean options.
-							(!parseArgsConfig.allowNegative && option.default !== false))
+							(!config.allowNegative && option.default !== false))
 					) {
 						const formattedDefault = JSON.stringify(option.default);
 						if (
@@ -253,9 +253,9 @@ export function printHelp(
 		}
 
 		// Print optional CLI footer.
-		if (parseArgsConfig.footer) {
+		if (config.footer) {
 			stream.write("\n");
-			stream.write(wrapText(parseArgsConfig.footer, width));
+			stream.write(wrapText(config.footer, width));
 			stream.write("\n");
 		}
 	} finally {
