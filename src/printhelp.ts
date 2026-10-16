@@ -45,7 +45,7 @@ export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 	 * Usage information for positional arguments appended to the usage string of
 	 * the help text.
 	 */
-	positionalsUsage?: string | undefined;
+	positionalsUsage?: string | undefined; // TODO: Rename to "usage" or something, and default to "[options]". Maybe even allow an array?
 	/**
 	 * A footer for the help text, printed after the options listing in the
 	 * help text.
