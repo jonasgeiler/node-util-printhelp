@@ -9,7 +9,84 @@
 
 ![Example Help Text Screenshot](./.github/assets/example-help-text.svg)
 
-Work in progress - please wait for version `1.0.0`.
+## Example
+
+Here is the code behind the ["Example Help Text" screenshot](#nodeutil-printhelp) above:
+
+```ts
+import { parseArgs } from "node:util";
+import {
+  type ParseArgsConfigWithHelpText,
+  printHelp,
+} from "node-util-printhelp";
+
+// Configuration is shared between `parseArgs` and `printHelp`.
+const config = {
+  name: "logreader",
+  description:
+    "Inspect, filter, and analyze application logs from your terminal.",
+  positionalsUsage: "<logfile>",
+  footer:
+    "Documentation: https://example.com/logreader/docs\n" +
+    "Report Issues: https://example.com/logreader/issues",
+  allowNegative: true,
+  options: {
+    follow: {
+      type: "boolean",
+      short: "f",
+      description: "Stream new log entries as they arrive",
+    },
+    lines: {
+      type: "string",
+      default: "50",
+      short: "n",
+      description: "Number of recent lines to display",
+    },
+    level: {
+      type: "string",
+      default: "INFO",
+      short: "l",
+      description: "Filter by log level",
+    },
+    search: {
+      type: "string",
+      short: "s",
+      description: "Filter entries by text or regular expression",
+    },
+    timestamps: {
+      type: "boolean",
+      default: true,
+      description: "Don't show timestamps",
+    },
+    json: {
+      type: "boolean",
+      short: "j",
+      description: "Parse and format JSON log entries",
+    },
+    version: {
+      type: "boolean",
+      short: "v",
+      description: "Print version information",
+    },
+    help: {
+      type: "boolean",
+      short: "h",
+      description: "Print help information",
+    },
+  },
+} as const satisfies ParseArgsConfigWithHelpText;
+
+// Parse command-line arguments as configured.
+const args = parseArgs(config);
+if (args.values.help) {
+  // Print help text and exit, if "-h/--help" argument is used.
+  printHelp(config);
+  process.exit(0);
+}
+
+// Handle other arguments...
+
+```
 
 [`util.parseArgs`]: https://nodejs.org/api/util.html#utilparseargsconfig
 [`node:util`]: https://nodejs.org/api/util.html
