@@ -7,8 +7,8 @@ import { isNonEmptyObject } from "./object-utils.ts";
 import { indentText, wrapText } from "./text-utils.ts";
 
 /**
- * An extension of {@link ParseArgsOptionDescriptor} which allows setting
- * a help text description used by {@link printHelp} for the option.
+ * An extension of {@link ParseArgsOptionDescriptor} which allows setting help
+ * text information for {@link printHelp}.
  */
 export interface ParseArgsOptionDescriptorWithHelpText
 	extends ParseArgsOptionDescriptor {
@@ -19,8 +19,9 @@ export interface ParseArgsOptionDescriptorWithHelpText
 }
 
 /**
- * An adaption of {@link import("node:util").ParseArgsOptionsConfig} using our
- * custom {@link ParseArgsOptionDescriptorWithHelpText} type as value.
+ * A mapping of long option names to
+ * {@link ParseArgsOptionDescriptorWithHelpText} values, adapted from
+ * {@link import("node:util").ParseArgsOptionsConfig}.
  */
 export interface ParseArgsOptionsConfigWithHelpText {
 	[longOption: string]: ParseArgsOptionDescriptorWithHelpText;
@@ -58,7 +59,7 @@ export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 }
 
 /**
- * Options for {@link printHelp}.
+ * The options accepted by {@link printHelp}.
  */
 export interface PrintHelpOptions {
 	/**
