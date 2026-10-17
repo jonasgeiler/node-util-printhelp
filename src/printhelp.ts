@@ -78,6 +78,7 @@ export interface PrintHelpOptions {
  */
 export function printHelp(
 	config: ParseArgsConfigWithHelpText,
+	// TODO: Maybe rename to "additionalOptions" to differentiate from config.options?
 	{ stream = process.stdout }: PrintHelpOptions = {},
 ) {
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
