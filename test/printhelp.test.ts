@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { Writable } from "node:stream";
-import { describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import type { WriteStream } from "node:tty";
 import { printHelp } from "../src/printhelp.ts";
 
@@ -9,6 +9,7 @@ interface CapturedStream {
 	getOutput: () => string;
 }
 
+// TODO: Can/Should I use TestsStream?
 function createCapturedStream(columns = 80): CapturedStream {
 	const chunks: string[] = [];
 	const stream = new Writable({
@@ -38,6 +39,19 @@ function withoutAnsi(text: string) {
 }
 
 describe("printHelp", () => {
+	// Make sure the COLUMNS environment variable won't be used unless tested
+	// explicitly.
+	let prevCOLUMNS: string | undefined;
+	beforeEach(() => {
+		prevCOLUMNS = process.env.COLUMNS;
+		delete process.env.COLUMNS;
+	});
+	afterEach(() => {
+		if (prevCOLUMNS !== undefined) {
+			process.env.COLUMNS = prevCOLUMNS;
+		}
+	});
+
 	it("prints the description, usage, sorted options, and footer", async () => {
 		const captured = createCapturedStream();
 
@@ -109,6 +123,37 @@ describe("printHelp", () => {
 
 	it("wraps long descriptions and moves an overflowing default to a new line", async () => {
 		const captured = createCapturedStream(100);
+
+		printHelp(
+			{
+				name: "tool",
+				options: {
+					config: {
+						type: "string",
+						description:
+							"Choose the configuration file used to initialize the application.",
+						default: "/a/very/long/path/to/the/configuration/file.json",
+					},
+				},
+			},
+			{ stream: captured.stream },
+		);
+		await waitForUncork();
+
+		assert.equal(
+			withoutAnsi(captured.getOutput()),
+			"Usage: tool [options]\n" +
+				"\n" +
+				"Options:\n" +
+				"  --config=...  Choose the configuration file used to\n" +
+				"                initialize the application.\n" +
+				'                (default: "/a/very/long/path/to/the/configuration/file.json")\n',
+		);
+	});
+
+	it("respects the COLUMNS environment variable", async () => {
+		process.env.COLUMNS = "100";
+		const captured = createCapturedStream(300);
 
 		printHelp(
 			{
