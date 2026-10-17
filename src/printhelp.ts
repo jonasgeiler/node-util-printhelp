@@ -83,6 +83,9 @@ export function printHelp(
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 	// With some learnings from: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/util/parse_args/parse_args.js
 
+	/** This is the string that gets printed at the end. */
+	let help = "";
+
 	// Get TTY width, respecting the `COLUMNS` environment variable if it exists.
 	// Use 75 % of the available TTY width, and at least 70 characters.
 	let columns = Number(process.env.COLUMNS);
@@ -96,171 +99,155 @@ export function printHelp(
 	const boldGreen = (text: string) =>
 		styleText(["bold", "green"], text, { stream });
 
-	// Buffer/batch stream writes, since we do a lot of smaller ones.
-	// The help text is only printed once `stream.uncork()` is called below.
-	stream.cork();
-
-	try {
-		// Print optional CLI description.
-		if (config.description) {
-			stream.write(wrapText(config.description, width));
-			stream.write("\n\n");
-		}
-
-		// Print CLI usage string.
-		let cliName = config.name;
-		if (!cliName) {
-			cliName = deduceCLIName();
-		}
-		let usage = `Usage: ${cliName} [options]`;
-		if (config.positionalsUsage) {
-			usage += ` ${config.positionalsUsage}`;
-		}
-		stream.write(bold(usage));
-		stream.write("\n");
-
-		if (isNonEmptyObject(config.options)) {
-			// Pre-process and sort configured options.
-			const sortedOptions = Object.entries(config.options)
-				.map((optionEntry) => {
-					if (
-						config.allowNegative &&
-						optionEntry[1].type === "boolean" &&
-						optionEntry[1].default === true
-					) {
-						// Prepend "no-" to long option name, since it's the only usage way.
-						// (We mainly do this here for sorting the options properly)
-						return [`no-${optionEntry[0]}`, optionEntry[1]] as [
-							string,
-							ParseArgsOptionDescriptorWithHelpText,
-						];
-					}
-					return optionEntry;
-				})
-				.sort(([option1Long], [option2Long]) =>
-					option1Long.localeCompare(option2Long),
-				);
-
-			// Calculate optimal first column width.
-			let firstColumnWidth = Math.floor(width * 0.4);
-			let maxFirstColumnUsed = 0;
-			for (const [optionLong, option] of sortedOptions) {
-				//                            4 == ("  " + "--").length
-				let firstColumnUsed = 4 + optionLong.length;
-				if (option.short) {
-					//                 3 == ("-" + ", ").length
-					firstColumnUsed += 3 + option.short.length;
-				}
-				if (option.type === "string") {
-					//                 4 == "=...".length
-					firstColumnUsed += 4;
-				}
-
-				if (firstColumnUsed > maxFirstColumnUsed) {
-					maxFirstColumnUsed = firstColumnUsed;
-				}
-			}
-			if (maxFirstColumnUsed < firstColumnWidth - 4) {
-				// If we have more than 4 blank gap spaces, reduce first column width.
-				firstColumnWidth = maxFirstColumnUsed + 2;
-			}
-
-			// Print the options.
-			stream.write("\n");
-			stream.write(bold("Options:"));
-			stream.write("\n");
-			const secondColumnWidth = Math.floor(width * 0.57);
-			for (const [optionLong, option] of sortedOptions) {
-				// Build display name of the option.
-				let displayName = "  ";
-				if (option.short) {
-					displayName += `-${option.short}, `;
-				}
-				displayName += `--${optionLong}`;
-				if (option.type === "string") {
-					displayName += "=...";
-				}
-
-				// Print the display name with its styling.
-				stream.write(boldGreen(displayName));
-
-				if (option.description || option.default !== undefined) {
-					// Print a padding.
-					let displayNameLen = displayName.length;
-					if (displayNameLen >= firstColumnWidth - 1) {
-						// Description needs to start at the next line.
-						stream.write("\n");
-						displayNameLen = 0;
-					}
-					const paddingLen = Math.max(2, firstColumnWidth - displayNameLen);
-					stream.write(" ".repeat(paddingLen));
-
-					// Holds the length of the last line written, used later below.
-					let lastLineLen = displayNameLen + paddingLen;
-
-					// Print the description.
-					let hasDescription = false;
-					if (option.description) {
-						hasDescription = true;
-
-						const formattedDescription = indentText(
-							wrapText(option.description, secondColumnWidth),
-							firstColumnWidth,
-						).trimStart();
-						stream.write(formattedDescription);
-
-						const descLines = formattedDescription.split("\n");
-						const descLinesLen = descLines.length;
-						if (descLinesLen > 1) {
-							// Description has been wrapped, so set new last line length.
-							// biome-ignore lint/style/noNonNullAssertion: Safe here.
-							lastLineLen = descLines[descLinesLen - 1]!.length;
-						} else if (descLinesLen === 1) {
-							// Just add the only description line to last line length.
-							// biome-ignore lint/style/noNonNullAssertion: Safe here.
-							lastLineLen += descLines[descLinesLen - 1]!.length;
-						}
-					}
-
-					// Print the default value.
-					if (
-						option.default !== undefined &&
-						(option.type !== "boolean" ||
-							// Don't show redundant default for boolean options.
-							(!config.allowNegative && option.default !== false))
-					) {
-						const formattedDefault = JSON.stringify(option.default);
-						if (
-							//            11 == ("(default: " + ")").length
-							lastLineLen + 11 + formattedDefault.length >
-							firstColumnWidth + secondColumnWidth
-						) {
-							// Last line does not fit the default info, so wrap to next line.
-							stream.write("\n");
-							stream.write(" ".repeat(firstColumnWidth));
-						} else if (hasDescription) {
-							// Default value will be written to same line as description,
-							// so add a space in between.
-							stream.write(" ");
-						}
-						stream.write("(default: ");
-						stream.write(formattedDefault);
-						stream.write(")");
-					}
-				}
-
-				stream.write("\n");
-			}
-		}
-
-		// Print optional CLI footer.
-		if (config.footer) {
-			stream.write("\n");
-			stream.write(wrapText(config.footer, width));
-			stream.write("\n");
-		}
-	} finally {
-		// Node.js recommends using `process.nextTick` for calling `stream.uncork`.
-		process.nextTick(() => stream.uncork());
+	// Add an optional CLI description to the help text.
+	if (config.description) {
+		help += wrapText(config.description, width) + "\n\n";
 	}
+
+	// Add a usage string to the help text.
+	let cliName = config.name;
+	if (!cliName) {
+		cliName = deduceCLIName();
+	}
+	let usage = `Usage: ${cliName} [options]`;
+	if (config.positionalsUsage) {
+		usage += " " + config.positionalsUsage;
+	}
+	help += bold(usage) + "\n";
+
+	if (isNonEmptyObject(config.options)) {
+		// Pre-process and sort configured options.
+		const sortedOptions = Object.entries(config.options)
+			.map((optionEntry) => {
+				if (
+					config.allowNegative &&
+					optionEntry[1].type === "boolean" &&
+					optionEntry[1].default === true
+				) {
+					// Prepend "no-" to long option name, since it's the only usage way.
+					// (We mainly do this here for sorting the options properly)
+					return ["no-" + optionEntry[0], optionEntry[1]] as [
+						string,
+						ParseArgsOptionDescriptorWithHelpText,
+					];
+				}
+				return optionEntry;
+			})
+			.sort(([option1Long], [option2Long]) =>
+				option1Long.localeCompare(option2Long),
+			);
+
+		// Calculate optimal first column width.
+		let firstColumnWidth = Math.floor(width * 0.4);
+		let maxFirstColumnUsed = 0;
+		for (const [optionLong, option] of sortedOptions) {
+			//                    4 == ("  " + "--").length
+			let firstColumnUsed = 4 + optionLong.length;
+			if (option.short) {
+				//                 3 == ("-" + ", ").length
+				firstColumnUsed += 3 + option.short.length;
+			}
+			if (option.type === "string") {
+				//                 4 == "=...".length
+				firstColumnUsed += 4;
+			}
+
+			if (firstColumnUsed > maxFirstColumnUsed) {
+				maxFirstColumnUsed = firstColumnUsed;
+			}
+		}
+		if (maxFirstColumnUsed < firstColumnWidth - 4) {
+			// If we have more than 4 blank gap spaces, reduce first column width.
+			firstColumnWidth = maxFirstColumnUsed + 2;
+		}
+
+		// Add the options list to the help text.
+		help += `\n${bold("Options:")}\n`;
+		const secondColumnWidth = Math.floor(width * 0.57);
+		for (const [optionLong, option] of sortedOptions) {
+			// Build display name of the option.
+			let displayName = "  ";
+			if (option.short) {
+				displayName += `-${option.short}, `;
+			}
+			displayName += "--" + optionLong;
+			if (option.type === "string") {
+				displayName += "=...";
+			}
+
+			// Add the option display name to the help text.
+			help += boldGreen(displayName);
+
+			if (option.description || option.default !== undefined) {
+				// Add a padding for the option description to the help text.
+				let displayNameLen = displayName.length;
+				if (displayNameLen >= firstColumnWidth - 1) {
+					// Description needs to start at the next line.
+					help += "\n";
+					displayNameLen = 0;
+				}
+				const paddingLen = Math.max(2, firstColumnWidth - displayNameLen);
+				help += " ".repeat(paddingLen);
+
+				// Holds the length of the last line written, used later below.
+				let lastLineLen = displayNameLen + paddingLen;
+
+				// Add an optional option description to the help text.
+				let hasDescription = false;
+				if (option.description) {
+					hasDescription = true;
+
+					const formattedDescription = indentText(
+						wrapText(option.description, secondColumnWidth),
+						firstColumnWidth,
+					).trimStart();
+					help += formattedDescription;
+
+					const descLines = formattedDescription.split("\n");
+					const descLinesLen = descLines.length;
+					if (descLinesLen > 1) {
+						// Description has been wrapped, so set new last line length.
+						// biome-ignore lint/style/noNonNullAssertion: Safe here.
+						lastLineLen = descLines[descLinesLen - 1]!.length;
+					} else if (descLinesLen === 1) {
+						// Just add the only description line to last line length.
+						// biome-ignore lint/style/noNonNullAssertion: Safe here.
+						lastLineLen += descLines[descLinesLen - 1]!.length;
+					}
+				}
+
+				// Add the default value to the help text, if needed.
+				if (
+					option.default !== undefined &&
+					(option.type !== "boolean" ||
+						// Don't show redundant default for boolean options.
+						(!config.allowNegative && option.default !== false))
+				) {
+					const formattedDefault = JSON.stringify(option.default);
+					if (
+						//            11 == ("(default: " + ")").length
+						lastLineLen + 11 + formattedDefault.length >
+						firstColumnWidth + secondColumnWidth
+					) {
+						// Last line does not fit the default info, so wrap to next line.
+						help += "\n" + " ".repeat(firstColumnWidth);
+					} else if (hasDescription) {
+						// Default value will be written to same line as description,
+						// so add a space in between.
+						help += " ";
+					}
+					help += `(default: ${formattedDefault})`;
+				}
+			}
+
+			help += "\n";
+		}
+	}
+
+	// Add an optional footer to the help text.
+	if (config.footer) {
+		help += `\n${wrapText(config.footer, width)}\n`;
+	}
+
+	stream.write(help);
 }

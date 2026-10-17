@@ -26,7 +26,12 @@
 		"enabled": true,
 		"rules": {
 			"preset": "recommended",
+			"style": {
+				// I use template strings only for two concatenations or more.
+				"useTemplate": "off"
+			},
 			"a11y": {
+				// Most SVGs get loaded as <img> in Markdown, so redundant.
 				"noSvgWithoutTitle": "off"
 			}
 		}
