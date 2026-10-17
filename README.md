@@ -43,12 +43,6 @@ const config = {
 			short: "n",
 			description: "Number of recent lines to display",
 		},
-		level: {
-			type: "string",
-			default: "INFO",
-			short: "l",
-			description: "Filter by log level",
-		},
 		search: {
 			type: "string",
 			short: "s",
@@ -64,6 +58,11 @@ const config = {
 			short: "j",
 			description: "Parse and format JSON log entries",
 		},
+		version: {
+			type: "boolean",
+			short: "v",
+			description: "Print version information",
+		},
 		help: {
 			type: "boolean",
 			short: "h",
@@ -75,7 +74,7 @@ const config = {
 // Parse command-line arguments as configured.
 const args = parseArgs(config);
 if (args.values.help) {
-  // If "-h/--help" argument is used, print help text and exit.
+	// If "-h/--help" argument is used, print help text and exit.
 	printHelp(config);
 	process.exit(0);
 }
