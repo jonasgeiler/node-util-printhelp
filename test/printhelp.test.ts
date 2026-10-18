@@ -34,6 +34,7 @@ async function waitForUncork() {
 }
 
 function withoutAnsi(text: string) {
+	// TODO: Use stripVTControlCharacters
 	// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence is intentional.
 	return text.replaceAll(/\u001B\[[0-9;]*m/g, "");
 }
@@ -57,9 +58,8 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options] <file>",
 				header: "A useful tool.",
-				positionalsUsage: "<file>",
 				options: {
 					verbose: {
 						short: "v",
@@ -98,7 +98,7 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options]",
 				allowNegative: true,
 				options: {
 					cache: {
@@ -126,7 +126,7 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options]",
 				options: {
 					config: {
 						type: "string",
@@ -157,7 +157,7 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options]",
 				options: {
 					config: {
 						type: "string",
@@ -187,7 +187,7 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options]",
 				footer: "Documentation can be found at https://tool.com/",
 			},
 			{ stream: captured.stream },
@@ -205,7 +205,10 @@ describe("printHelp", () => {
 	it("skips printing an options header if options is an empty object", async () => {
 		const captured = createCapturedStream();
 
-		printHelp({ name: "tool", options: {} }, { stream: captured.stream });
+		printHelp(
+			{ usage: "tool [options]", options: {} },
+			{ stream: captured.stream },
+		);
 		await waitForUncork();
 
 		assert.equal(withoutAnsi(captured.getOutput()), "Usage: tool [options]\n");
@@ -216,7 +219,7 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options]",
 				options: {
 					abcdefghijklmnopqrstuvwxy: {
 						type: "boolean",
@@ -243,7 +246,7 @@ describe("printHelp", () => {
 
 		printHelp(
 			{
-				name: "tool",
+				usage: "tool [options]",
 				options: {
 					bare: { type: "boolean" },
 					config: { type: "string", default: "config.json" },
@@ -267,16 +270,42 @@ describe("printHelp", () => {
 		);
 	});
 
-	it("deduces the CLI name when no name is configured", async (t) => {
-		const captured = createCapturedStream();
+	it("deduces the CLI name when no usage is configured", async (t) => {
 		t.mock.property(process, "argv", ["/usr/bin/node", "/tmp/example-cli.js"]);
 
-		printHelp({}, { stream: captured.stream });
+		const captured1 = createCapturedStream();
+
+		printHelp({}, { stream: captured1.stream });
+		await waitForUncork();
+
+		assert.equal(
+			withoutAnsi(captured1.getOutput()),
+			"Usage: example-cli.js [options]\n",
+		);
+
+		const captured2 = createCapturedStream();
+
+		printHelp({ usage: [] }, { stream: captured2.stream });
+		await waitForUncork();
+
+		assert.equal(
+			withoutAnsi(captured2.getOutput()),
+			"Usage: example-cli.js [options]\n",
+		);
+	});
+
+	it("accepts multiple usage strings", async () => {
+		const captured = createCapturedStream();
+
+		printHelp(
+			{ usage: ["tool [options]", "tool gui [options]"] },
+			{ stream: captured.stream },
+		);
 		await waitForUncork();
 
 		assert.equal(
 			withoutAnsi(captured.getOutput()),
-			"Usage: example-cli.js [options]\n",
+			"Usage: tool [options]\n       tool gui [options]\n",
 		);
 	});
 });

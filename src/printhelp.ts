@@ -33,19 +33,15 @@ export interface ParseArgsOptionsConfigWithHelpText {
  */
 export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 	/**
+	 * Usage information for positional arguments appended to the usage string of
+	 * the help text.
+	 */
+	usage?: string | string[] | undefined;
+	/**
 	 * A header for the help text, printed before the usage string in the
 	 * help text.
 	 */
 	header?: string | undefined;
-	/**
-	 * The name of the CLI, used in the usage string of the help text.
-	 */
-	name?: string | undefined;
-	/**
-	 * Usage information for positional arguments appended to the usage string of
-	 * the help text.
-	 */
-	positionalsUsage?: string | undefined; // TODO: Rename to "usage" or something, and default to "[options]". Maybe even allow an array?
 	/**
 	 * A footer for the help text, printed after the options listing in the
 	 * help text.
@@ -106,15 +102,14 @@ export function printHelp(
 	}
 
 	// Add a usage string to the help text.
-	let cliName = config.name;
-	if (!cliName) {
-		cliName = deduceCLIName();
+	let usage = Array.isArray(config.usage)
+		? //                                  7 == "Usage: ".length
+			indentText(config.usage.join("\n"), 7).trimStart()
+		: config.usage;
+	if (!usage) {
+		usage = deduceCLIName() + " [options]";
 	}
-	let usage = `Usage: ${cliName} [options]`;
-	if (config.positionalsUsage) {
-		usage += " " + config.positionalsUsage;
-	}
-	help += bold(usage) + "\n";
+	help += bold("Usage: " + usage) + "\n";
 
 	if (isNonEmptyObject(config.options)) {
 		// Pre-process and sort configured options.
@@ -134,6 +129,7 @@ export function printHelp(
 				}
 				return optionEntry;
 			})
+			// TODO: Reconsider if we should sort, or let the user do it beforehand.
 			.sort(([option1Long], [option2Long]) =>
 				option1Long.localeCompare(option2Long),
 			);
@@ -250,5 +246,6 @@ export function printHelp(
 		help += `\n${wrapText(config.footer, width)}\n`;
 	}
 
+	// TODO: Do I need to handle stream "error" events?
 	stream.write(help);
 }

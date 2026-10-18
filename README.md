@@ -15,7 +15,7 @@
 ![Example help text](./.github/assets/example-help-text.svg)
 
 ```ts
-import { parseArgs } from "node:util";
+import { parseArgs, styleText } from "node:util";
 import {
 	type ParseArgsConfigWithHelpText,
 	printHelp,
@@ -23,10 +23,11 @@ import {
 
 // The same configuration can be passed to `parseArgs` and `printHelp`.
 const config = {
-	name: "logreader",
-	header:
-		"Inspect, filter, and analyze application logs from your terminal.",
-	positionalsUsage: "<logfile>",
+	usage: [
+		"logreader [options] [ application.log ]",
+		"logreader gui [options] [ application.log ]",
+	],
+	header: "Inspect, filter, and analyze application logs from your terminal.",
 	footer:
 		"Documentation: https://example.com/logreader/docs\n" +
 		"Report issues: https://example.com/logreader/issues",
@@ -71,10 +72,27 @@ const config = {
 	},
 } as const satisfies ParseArgsConfigWithHelpText;
 
-// Parse command-line arguments as configured.
-const args = parseArgs(config);
+// Try to parse command-line arguments as configured.
+let args;
+try {
+	args = parseArgs(config);
+} catch (error: any) {
+	if (
+		error.code === "ERR_PARSE_ARGS_INVALID_OPTION_VALUE" ||
+		error.code === "ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL" ||
+		error.code === "ERR_PARSE_ARGS_UNKNOWN_OPTION"
+	) {
+		// If CLI is used incorrectly, print error + help text and exit 1.
+		const stream = process.stderr;
+		stream.write(styleText("red", `Error: ${error.message}\n\n`, { stream }));
+		printHelp(config, { stream });
+		process.exit(1);
+	}
+	throw error;
+}
+
 if (args.values.help) {
-	// If "-h/--help" argument is used, print help text and exit.
+	// If "-h/--help" argument is used, print help text and exit 0.
 	printHelp(config);
 	process.exit(0);
 }
@@ -241,7 +259,7 @@ import { printHelp } from "@jonasgeiler/node-util-printhelp";
 - `config` [`<Object>`][] The configuration shared with [`util.parseArgs`][]. It accepts the standard `util.ParseArgsConfig` fields, plus some extra help-text properties described below.
 	- `name` [`<string>`][] The CLI name shown in the usage line. **Default:** Deduced from the running process.
   - `header` [`<string>`][] Optional header text printed before the usage line.
-  - `positionalsUsage` [`<string>`][] Optional usage text appended after `[options]`, for example `"<input-file> <output-file>"`.
+  - `usage` [`<string>`][] Optional usage text appended after `[options]`, for example `"<input-file> <output-file>"`.
   - `footer` [`<string>`][] Optional footer text printed after the options list.
   - `options` [`<Object>`][] The options for [`util.parseArgs`][]. Options are sorted alphabetically by their key in the help text.
     - `description` [`<string>`][] An optional description printed beside the option. It is used only by `printHelp` and ignored by [`util.parseArgs`][].
