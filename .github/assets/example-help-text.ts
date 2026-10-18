@@ -12,8 +12,7 @@ import {
 // The same configuration can be passed to `parseArgs` and `printHelp`.
 const config = {
 	name: "logreader",
-	description:
-		"Inspect, filter, and analyze application logs from your terminal.",
+	header: "Inspect, filter, and analyze application logs from your terminal.",
 	positionalsUsage: "<logfile>",
 	footer:
 		"Documentation: https://example.com/logreader/docs\n" +

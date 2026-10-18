@@ -33,10 +33,10 @@ export interface ParseArgsOptionsConfigWithHelpText {
  */
 export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 	/**
-	 * An overall description of the CLI, printed before the usage string in the
+	 * A header for the help text, printed before the usage string in the
 	 * help text.
 	 */
-	description?: string | undefined;
+	header?: string | undefined;
 	/**
 	 * The name of the CLI, used in the usage string of the help text.
 	 */
@@ -100,9 +100,9 @@ export function printHelp(
 	const boldGreen = (text: string) =>
 		styleText(["bold", "green"], text, { stream });
 
-	// Add an optional CLI description to the help text.
-	if (config.description) {
-		help += wrapText(config.description, width) + "\n\n";
+	// Add an optional header to the help text.
+	if (config.header) {
+		help += wrapText(config.header, width) + "\n\n";
 	}
 
 	// Add a usage string to the help text.

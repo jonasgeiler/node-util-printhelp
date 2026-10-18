@@ -24,7 +24,7 @@ import {
 // The same configuration can be passed to `parseArgs` and `printHelp`.
 const config = {
 	name: "logreader",
-	description:
+	header:
 		"Inspect, filter, and analyze application logs from your terminal.",
 	positionalsUsage: "<logfile>",
 	footer:
@@ -240,7 +240,7 @@ import { printHelp } from "@jonasgeiler/node-util-printhelp";
 
 - `config` [`<Object>`][] The configuration shared with [`util.parseArgs`][]. It accepts the standard `util.ParseArgsConfig` fields, plus some extra help-text properties described below.
 	- `name` [`<string>`][] The CLI name shown in the usage line. **Default:** Deduced from the running process.
-  - `description` [`<string>`][] An optional CLI description printed before the usage line.
+  - `header` [`<string>`][] Optional header text printed before the usage line.
   - `positionalsUsage` [`<string>`][] Optional usage text appended after `[options]`, for example `"<input-file> <output-file>"`.
   - `footer` [`<string>`][] Optional footer text printed after the options list.
   - `options` [`<Object>`][] The options for [`util.parseArgs`][]. Options are sorted alphabetically by their key in the help text.

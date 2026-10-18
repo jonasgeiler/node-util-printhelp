@@ -58,7 +58,7 @@ describe("printHelp", () => {
 		printHelp(
 			{
 				name: "tool",
-				description: "A useful tool.",
+				header: "A useful tool.",
 				positionalsUsage: "<file>",
 				options: {
 					verbose: {
