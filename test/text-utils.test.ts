@@ -56,4 +56,8 @@ describe("wrapText", () => {
 	it("preserves text without spaces", () => {
 		assert.equal(wrapText("helloworld", 5), "helloworld");
 	});
+
+	it("throws if maxWidth is not an integer", () => {
+		assert.throws(() => wrapText("hello world", 1.5), /^WrapTextError:/);
+	});
 });
