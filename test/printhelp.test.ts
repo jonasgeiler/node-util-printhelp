@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import { Writable } from "node:stream";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import type { WriteStream } from "node:tty";
+import { stripVTControlCharacters } from "node:util";
 import { printHelp } from "../src/printhelp.ts";
 
 interface CapturedStream {
@@ -31,12 +32,6 @@ function createCapturedStream(columns = 80): CapturedStream {
 
 async function waitForUncork() {
 	await new Promise<void>((resolve) => process.nextTick(resolve));
-}
-
-function withoutAnsi(text: string) {
-	// TODO: Use stripVTControlCharacters
-	// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence is intentional.
-	return text.replaceAll(/\u001B\[[0-9;]*m/g, "");
 }
 
 describe("printHelp", () => {
@@ -80,7 +75,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"A useful tool.\n" +
 				"\n" +
 				"Usage: tool [options] <file>\n" +
@@ -113,7 +108,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n" +
 				"\n" +
 				"Options:\n" +
@@ -141,7 +136,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n" +
 				"\n" +
 				"Options:\n" +
@@ -172,7 +167,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n" +
 				"\n" +
 				"Options:\n" +
@@ -195,7 +190,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n" +
 				"\n" +
 				"Documentation can be found at https://tool.com/\n",
@@ -211,7 +206,10 @@ describe("printHelp", () => {
 		);
 		await waitForUncork();
 
-		assert.equal(withoutAnsi(captured.getOutput()), "Usage: tool [options]\n");
+		assert.equal(
+			stripVTControlCharacters(captured.getOutput()),
+			"Usage: tool [options]\n",
+		);
 	});
 
 	it("moves a long option description to the next line", async () => {
@@ -232,7 +230,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n" +
 				"\n" +
 				"Options:\n" +
@@ -259,7 +257,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n" +
 				"\n" +
 				"Options:\n" +
@@ -279,7 +277,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured1.getOutput()),
+			stripVTControlCharacters(captured1.getOutput()),
 			"Usage: example-cli.js [options]\n",
 		);
 
@@ -289,7 +287,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured2.getOutput()),
+			stripVTControlCharacters(captured2.getOutput()),
 			"Usage: example-cli.js [options]\n",
 		);
 	});
@@ -304,7 +302,7 @@ describe("printHelp", () => {
 		await waitForUncork();
 
 		assert.equal(
-			withoutAnsi(captured.getOutput()),
+			stripVTControlCharacters(captured.getOutput()),
 			"Usage: tool [options]\n       tool gui [options]\n",
 		);
 	});
