@@ -10,8 +10,8 @@ interface CapturedStream {
 	getOutput: () => string;
 }
 
-// TODO: Can/Should I use TestsStream?
 function createCapturedStream(columns = 80): CapturedStream {
+	// TODO: Mock stream properties or tty module instead?
 	const chunks: string[] = [];
 	const stream = new Writable({
 		write(chunk, _encoding, callback) {
