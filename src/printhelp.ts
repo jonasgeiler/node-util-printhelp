@@ -10,7 +10,7 @@ import { indentText, wrapText } from "./text-utils.ts";
  * An extension of {@link ParseArgsOptionDescriptor} which allows setting help
  * text information for {@link printHelp}.
  */
-export interface ParseArgsOptionDescriptorWithHelpText
+export interface ParseArgsAndPrintHelpOptionDescriptor
 	extends ParseArgsOptionDescriptor {
 	/**
 	 * A description of the option, printed next to this option in the help text.
@@ -20,18 +20,18 @@ export interface ParseArgsOptionDescriptorWithHelpText
 
 /**
  * A mapping of long option names to
- * {@link ParseArgsOptionDescriptorWithHelpText} values, adapted from
+ * {@link ParseArgsAndPrintHelpOptionDescriptor} values, adapted from
  * {@link import("node:util").ParseArgsOptionsConfig}.
  */
-export interface ParseArgsOptionsConfigWithHelpText {
-	[longOption: string]: ParseArgsOptionDescriptorWithHelpText;
+export interface ParseArgsAndPrintHelpOptionsConfig {
+	[longOption: string]: ParseArgsAndPrintHelpOptionDescriptor;
 }
 
 /**
  * An extension of {@link ParseArgsConfig} which allows setting help text
  * information for {@link printHelp}.
  */
-export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
+export interface ParseArgsAndPrintHelpConfig extends ParseArgsConfig {
 	/**
 	 * Usage information for positional arguments appended to the usage string of
 	 * the help text.
@@ -51,13 +51,13 @@ export interface ParseArgsConfigWithHelpText extends ParseArgsConfig {
 	/**
 	 * Used to describe arguments known to the parser.
 	 */
-	options?: ParseArgsOptionsConfigWithHelpText | undefined;
+	options?: ParseArgsAndPrintHelpOptionsConfig | undefined;
 }
 
 /**
- * The options accepted by {@link printHelp}.
+ * Additional options accepted by {@link printHelp}.
  */
-export interface PrintHelpOptions {
+export interface AdditionalPrintHelpOptions {
 	/**
 	 * A TTY stream where the help text will be printed to.
 	 * Also used to validate if colors can be used and how many columns the
@@ -70,12 +70,11 @@ export interface PrintHelpOptions {
  * Print help text for the given `util.parseArgs` configuration, formatted
  * for the given TTY stream.
  * @param config
- * @param options
+ * @param additionalOptions
  */
 export function printHelp(
-	config: ParseArgsConfigWithHelpText,
-	// TODO: Maybe rename to "additionalOptions" to differentiate from config.options?
-	{ stream = process.stdout }: PrintHelpOptions = {},
+	config: ParseArgsAndPrintHelpConfig,
+	{ stream = process.stdout }: AdditionalPrintHelpOptions = {},
 ) {
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 	// With some learnings from: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/util/parse_args/parse_args.js
@@ -124,7 +123,7 @@ export function printHelp(
 					// (We mainly do this here for sorting the options properly)
 					return ["no-" + optionEntry[0], optionEntry[1]] as [
 						string,
-						ParseArgsOptionDescriptorWithHelpText,
+						ParseArgsAndPrintHelpOptionDescriptor,
 					];
 				}
 				return optionEntry;

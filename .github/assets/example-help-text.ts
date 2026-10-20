@@ -8,7 +8,7 @@
 
 import { parseArgs, styleText } from "node:util";
 import {
-	type ParseArgsConfigWithHelpText,
+	type ParseArgsAndPrintHelpConfig,
 	printHelp,
 } from "../../src/printhelp.ts";
 
@@ -61,7 +61,7 @@ const config = {
 			description: "Print help information",
 		},
 	},
-} as const satisfies ParseArgsConfigWithHelpText;
+} as const satisfies ParseArgsAndPrintHelpConfig;
 
 // Try to parse command-line arguments as configured.
 let args;

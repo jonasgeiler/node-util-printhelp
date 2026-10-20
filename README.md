@@ -17,7 +17,7 @@
 ```ts
 import { parseArgs, styleText } from "node:util";
 import {
-	type ParseArgsConfigWithHelpText,
+	type ParseArgsAndPrintHelpConfig,
 	printHelp,
 } from "node-util-printhelp";
 
@@ -70,7 +70,7 @@ const config = {
 			description: "Print help information",
 		},
 	},
-} as const satisfies ParseArgsConfigWithHelpText;
+} as const satisfies ParseArgsAndPrintHelpConfig;
 
 // Try to parse command-line arguments as configured.
 let args;
@@ -257,13 +257,12 @@ import { printHelp } from "@jonasgeiler/node-util-printhelp";
 ### `printHelp(config[, options])`
 
 - `config` [`<Object>`][] The configuration shared with [`util.parseArgs`][]. It accepts the standard `util.ParseArgsConfig` fields, plus some extra help-text properties described below.
-	- `name` [`<string>`][] The CLI name shown in the usage line. **Default:** Deduced from the running process.
+  - `usage` [`<string>`][] | [`<string>`][][] One or more lines of usage text appended after `Usage: `, for example `"toolname [options] <input-file> <output-file>"`. **Default:** CLI name deduced from the running process + `" [options]"`
   - `header` [`<string>`][] Optional header text printed before the usage line.
-  - `usage` [`<string>`][] Optional usage text appended after `[options]`, for example `"<input-file> <output-file>"`.
   - `footer` [`<string>`][] Optional footer text printed after the options list.
   - `options` [`<Object>`][] The options for [`util.parseArgs`][]. Options are sorted alphabetically by their key in the help text.
     - `description` [`<string>`][] An optional description printed beside the option. It is used only by `printHelp` and ignored by [`util.parseArgs`][].
-- `options` [`<Object>`][] Optional additional settings exclusive to `printHelp`.
+- `additionalOptions` [`<Object>`][] Optional additional settings exclusive to `printHelp`.
   - `stream` [`<tty.WriteStream>`][] The [`WriteStream`][] to which help text is written and which determines if text styling is used and how wide the output should be. **Default:** `process.stdout`
 
 Prints formatted help text for a [`util.parseArgs`][] configuration.
