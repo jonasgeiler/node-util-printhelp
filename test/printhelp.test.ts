@@ -30,10 +30,6 @@ function createCapturedStream(columns = 80): CapturedStream {
 	};
 }
 
-async function waitForUncork() {
-	await new Promise<void>((resolve) => process.nextTick(resolve));
-}
-
 describe("printHelp", () => {
 	// Make sure the COLUMNS environment variable won't be used unless tested
 	// explicitly.
@@ -72,7 +68,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -105,7 +100,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -133,7 +127,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -164,7 +157,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -187,7 +179,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -204,7 +195,6 @@ describe("printHelp", () => {
 			{ usage: "tool [options]", options: {} },
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -227,7 +217,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -254,7 +243,6 @@ describe("printHelp", () => {
 			},
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
@@ -274,7 +262,6 @@ describe("printHelp", () => {
 		const captured1 = createCapturedStream();
 
 		printHelp({}, { stream: captured1.stream });
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured1.getOutput()),
@@ -284,7 +271,6 @@ describe("printHelp", () => {
 		const captured2 = createCapturedStream();
 
 		printHelp({ usage: [] }, { stream: captured2.stream });
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured2.getOutput()),
@@ -299,7 +285,6 @@ describe("printHelp", () => {
 			{ usage: ["tool [options]", "tool gui [options]"] },
 			{ stream: captured.stream },
 		);
-		await waitForUncork();
 
 		assert.equal(
 			stripVTControlCharacters(captured.getOutput()),
