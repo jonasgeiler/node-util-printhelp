@@ -104,9 +104,7 @@ export function printHelp(
 		? //                                  7 == "Usage: ".length
 			indentText(config.usage.join("\n"), 7).trimStart()
 		: config.usage;
-	if (!usage) {
-		usage = deduceCLIName() + " [options]";
-	}
+	usage ||= deduceCLIName() + " [options]";
 	help += bold("Usage: " + usage) + "\n";
 
 	// Calling `Object.entries` on a potentially empty object is acceptable,
