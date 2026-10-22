@@ -44,7 +44,7 @@ describe("printHelp", () => {
 		}
 	});
 
-	it("prints the description, usage, sorted options, and footer", async () => {
+	it("prints the description, usage, options, and footer", async () => {
 		const captured = createCapturedStream();
 
 		printHelp(
@@ -76,8 +76,8 @@ describe("printHelp", () => {
 				"Usage: tool [options] <file>\n" +
 				"\n" +
 				"Options:\n" +
-				'  -o, --output=...  Output path. (default: "result.txt")\n' +
 				"  -v, --verbose     Show details.\n" +
+				'  -o, --output=...  Output path. (default: "result.txt")\n' +
 				"\n" +
 				"More information is available in the manual.\n",
 		);

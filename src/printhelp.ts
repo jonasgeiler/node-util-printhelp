@@ -111,37 +111,25 @@ export function printHelp(
 	help += bold("Usage: " + usage) + "\n";
 
 	if (isNonEmptyObject(config.options)) {
-		// Pre-process and sort configured options.
-		const sortedOptions = Object.entries(config.options)
-			.map((optionEntry) => {
-				if (
-					config.allowNegative &&
-					optionEntry[1].type === "boolean" &&
-					optionEntry[1].default === true
-				) {
-					// Prepend "no-" to long option name, since it's the only usage way.
-					// (We mainly do this here for sorting the options properly)
-					return ["no-" + optionEntry[0], optionEntry[1]] as [
-						string,
-						ParseArgsAndPrintHelpOptionDescriptor,
-					];
-				}
-				return optionEntry;
-			})
-			// TODO: Reconsider if we should sort, or let the user do it beforehand.
-			.sort(([option1Long], [option2Long]) =>
-				option1Long.localeCompare(option2Long),
-			);
+		const options = Object.entries(config.options);
 
 		// Calculate optimal first column width.
 		let firstColumnWidth = Math.floor(width * 0.4);
 		let maxFirstColumnUsed = 0;
-		for (const [optionLong, option] of sortedOptions) {
+		for (const [optionLong, option] of options) {
 			//                    4 == ("  " + "--").length
 			let firstColumnUsed = 4 + optionLong.length;
 			if (option.short) {
 				//                 3 == ("-" + ", ").length
 				firstColumnUsed += 3 + option.short.length;
+			}
+			if (
+				config.allowNegative &&
+				option.type === "boolean" &&
+				option.default === true
+			) {
+				//                 3 == "no-".length
+				firstColumnUsed += 3;
 			}
 			if (option.type === "string") {
 				//                 4 == "=...".length
@@ -160,13 +148,21 @@ export function printHelp(
 		// Add the options list to the help text.
 		help += `\n${bold("Options:")}\n`;
 		const secondColumnWidth = Math.floor(width * 0.57);
-		for (const [optionLong, option] of sortedOptions) {
+		for (const [optionLong, option] of options) {
 			// Build display name of the option.
 			let displayName = "  ";
 			if (option.short) {
 				displayName += `-${option.short}, `;
 			}
-			displayName += "--" + optionLong;
+			displayName += "--";
+			if (
+				config.allowNegative &&
+				option.type === "boolean" &&
+				option.default === true
+			) {
+				displayName += "no-";
+			}
+			displayName += optionLong;
 			if (option.type === "string") {
 				displayName += "=...";
 			}
