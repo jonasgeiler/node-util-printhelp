@@ -3,7 +3,6 @@ import type { WriteStream } from "node:tty";
 import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
 import { styleText } from "node:util";
 import { deduceCLIName } from "./argv-utils.ts";
-import { isNonEmptyObject } from "./object-utils.ts";
 import { indentText, wrapText } from "./text-utils.ts";
 
 /**
@@ -110,9 +109,10 @@ export function printHelp(
 	}
 	help += bold("Usage: " + usage) + "\n";
 
-	if (isNonEmptyObject(config.options)) {
-		const options = Object.entries(config.options);
-
+	// Calling `Object.entries` on a potentially empty object is acceptable,
+	// since it's very rare.
+	const options = Object.entries(config.options || {});
+	if (options.length) {
 		// Calculate optimal first column width.
 		let firstColumnWidth = Math.floor(width * 0.4);
 		let maxFirstColumnUsed = 0;
