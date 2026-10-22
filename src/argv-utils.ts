@@ -100,14 +100,14 @@ export function deduceCLIName(): string {
 						// since it's just used in the help text.
 						// Taken from: https://github.com/ericcornelissen/shescape/blob/14a29b15f0187314f0cb02d58b14ecfe61d97527/src/internal/unix/bash.js#L39-L48
 						// and: https://github.com/xxorax/node-shell-escape/blob/ebdb90e58050d74dbda9b8177f7de11cbb355d94/shell-escape.js#L8
-						if (/[^A-Za-z0-9_/:=-]/.test(arg)) {
+						if (/[^a-z0-9_/:=-]/i.test(arg)) {
 							return (
 								"'" +
 								arg
 									// biome-ignore lint/suspicious/noControlCharactersInRegex: We want to remove control characters.
 									.replaceAll(/[\0\u0008\u001B\u009B]/g, "")
 									.replaceAll(/(\r\n)|\r/g, "$1")
-									.replaceAll(/'/g, "'\\''") +
+									.replaceAll("'", "'\\''") +
 								"'"
 							);
 						}
