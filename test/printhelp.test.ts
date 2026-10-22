@@ -110,6 +110,34 @@ describe("printHelp", () => {
 		);
 	});
 
+	it("ignores short alias for negative boolean options", async () => {
+		const captured = createCapturedStream();
+
+		printHelp(
+			{
+				usage: "tool [options]",
+				allowNegative: true,
+				options: {
+					cache: {
+						type: "boolean",
+						default: true,
+						description: "Disable caching.",
+						short: "c",
+					},
+				},
+			},
+			{ stream: captured.stream },
+		);
+
+		assert.equal(
+			stripVTControlCharacters(captured.getOutput()),
+			"Usage: tool [options]\n" +
+				"\n" +
+				"Options:\n" +
+				"  --no-cache  Disable caching.\n",
+		);
+	});
+
 	it("wraps long descriptions and moves an overflowing default to a new line", async () => {
 		const captured = createCapturedStream(100);
 

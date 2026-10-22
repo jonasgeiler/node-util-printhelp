@@ -119,10 +119,6 @@ export function printHelp(
 		for (const [optionLong, option] of options) {
 			//                    4 == ("  " + "--").length
 			let firstColumnUsed = 4 + optionLong.length;
-			if (option.short) {
-				//                 3 == ("-" + ", ").length
-				firstColumnUsed += 3 + option.short.length;
-			}
 			if (
 				config.allowNegative &&
 				option.type === "boolean" &&
@@ -130,6 +126,9 @@ export function printHelp(
 			) {
 				//                 3 == "no-".length
 				firstColumnUsed += 3;
+			} else if (option.short) {
+				//                 3 == ("-" + ", ").length
+				firstColumnUsed += 3 + option.short.length;
 			}
 			if (option.type === "string") {
 				//                 4 == "=...".length
@@ -151,16 +150,17 @@ export function printHelp(
 		for (const [optionLong, option] of options) {
 			// Build display name of the option.
 			let displayName = "  ";
-			if (option.short) {
-				displayName += `-${option.short}, `;
-			}
-			displayName += "--";
 			if (
 				config.allowNegative &&
 				option.type === "boolean" &&
 				option.default === true
 			) {
-				displayName += "no-";
+				displayName += "--no-";
+			} else {
+				if (option.short) {
+					displayName += `-${option.short}, `;
+				}
+				displayName += "--";
 			}
 			displayName += optionLong;
 			if (option.type === "string") {
