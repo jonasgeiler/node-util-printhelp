@@ -1,7 +1,10 @@
-import type { WriteStream } from "node:tty";
+import type { WriteStream as TTYWriteStream } from "node:tty";
 // noinspection ES6UnusedImports
-import type { ParseArgsConfig, ParseArgsOptionDescriptor } from "node:util";
-import { styleText } from "node:util";
+import {
+	type ParseArgsConfig,
+	type ParseArgsOptionDescriptor,
+	styleText,
+} from "node:util";
 import { deduceCLIName } from "./argv-utils.ts";
 import { indentText, wrapText } from "./text-utils.ts";
 
@@ -58,18 +61,19 @@ export interface ParseArgsAndPrintHelpConfig extends ParseArgsConfig {
  */
 export interface AdditionalPrintHelpOptions {
 	/**
-	 * A TTY stream where the help text will be printed to.
+	 * A stream where the help text will be written to.
 	 * Also used to validate if colors can be used and how many columns the
 	 * help text can be wide.
+	 * @default process.stdout
 	 */
-	stream?: WriteStream;
+	stream?: NodeJS.WritableStream | undefined;
 }
 
 /**
  * Print help text for the given `util.parseArgs` configuration, formatted
  * for the given TTY stream.
- * @param config
- * @param additionalOptions
+ * @param config {@link ParseArgsAndPrintHelpConfig}
+ * @param additionalOptions {@link AdditionalPrintHelpOptions}
  */
 export function printHelp(
 	config: ParseArgsAndPrintHelpConfig,
@@ -85,7 +89,7 @@ export function printHelp(
 	// Use 75 % of the available TTY width, and at least 70 characters.
 	let columns = Number(process.env.COLUMNS);
 	if (!Number.isSafeInteger(columns) || columns <= 0) {
-		columns = stream.columns || 1;
+		columns = (stream as TTYWriteStream).columns || 1;
 	}
 	const width = Math.max(70, columns * 0.75);
 
@@ -239,6 +243,5 @@ export function printHelp(
 		help += `\n${wrapText(config.footer, width)}\n`;
 	}
 
-	// TODO: Do I need to handle stream "error" events?
 	stream.write(help);
 }
