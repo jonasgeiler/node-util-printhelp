@@ -66,7 +66,9 @@ describe("printHelp", () => {
 				},
 				footer: "More information is available in the manual.",
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -98,7 +100,9 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -126,7 +130,9 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -153,7 +159,9 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -183,7 +191,9 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -205,7 +215,9 @@ describe("printHelp", () => {
 				usage: "tool [options]",
 				footer: "Documentation can be found at https://tool.com/",
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -220,8 +232,13 @@ describe("printHelp", () => {
 		const captured = createCapturedStream();
 
 		printHelp(
-			{ usage: "tool [options]", options: {} },
-			{ stream: captured.stream },
+			{
+				usage: "tool [options]",
+				options: {},
+			},
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -243,7 +260,9 @@ describe("printHelp", () => {
 					},
 				},
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -263,13 +282,26 @@ describe("printHelp", () => {
 			{
 				usage: "tool [options]",
 				options: {
-					bare: { type: "boolean" },
-					config: { type: "string", default: "config.json" },
-					disabled: { type: "boolean", default: false },
-					enabled: { type: "boolean", default: true },
+					bare: {
+						type: "boolean",
+					},
+					config: {
+						type: "string",
+						default: "config.json",
+					},
+					disabled: {
+						type: "boolean",
+						default: false,
+					},
+					enabled: {
+						type: "boolean",
+						default: true,
+					},
 				},
 			},
-			{ stream: captured.stream },
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(
@@ -289,7 +321,12 @@ describe("printHelp", () => {
 
 		const captured1 = createCapturedStream();
 
-		printHelp({}, { stream: captured1.stream });
+		printHelp(
+			{},
+			{
+				stream: captured1.stream,
+			},
+		);
 
 		assert.equal(
 			stripVTControlCharacters(captured1.getOutput()),
@@ -298,7 +335,14 @@ describe("printHelp", () => {
 
 		const captured2 = createCapturedStream();
 
-		printHelp({ usage: [] }, { stream: captured2.stream });
+		printHelp(
+			{
+				usage: [],
+			},
+			{
+				stream: captured2.stream,
+			},
+		);
 
 		assert.equal(
 			stripVTControlCharacters(captured2.getOutput()),
@@ -310,8 +354,12 @@ describe("printHelp", () => {
 		const captured = createCapturedStream();
 
 		printHelp(
-			{ usage: ["tool [options]", "tool gui [options]"] },
-			{ stream: captured.stream },
+			{
+				usage: ["tool [options]", "tool gui [options]"],
+			},
+			{
+				stream: captured.stream,
+			},
 		);
 
 		assert.equal(

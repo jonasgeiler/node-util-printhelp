@@ -97,9 +97,14 @@ export function printHelp(
 	const width = Math.max(70, columns * 0.75);
 
 	// Text styling helpers for the given TTY stream.
-	const bold = (text: string) => styleText("bold", text, { stream });
+	const bold = (text: string) =>
+		styleText("bold", text, {
+			stream,
+		});
 	const boldGreen = (text: string) =>
-		styleText(["bold", "green"], text, { stream });
+		styleText(["bold", "green"], text, {
+			stream,
+		});
 
 	// Add an optional header to the help text.
 	if (config.header) {
