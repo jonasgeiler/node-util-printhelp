@@ -1,7 +1,7 @@
 // Run this to copy the help text with ANSI colors to the Wayland clipboard:
 //  COLUMNS=1000 FORCE_COLOR=1 node ./.github/assets/example-help-text.ts --help | wl-copy
 // Afterward, use https://boron.sh to create a nice SVG terminal "screenshot".
-// Link with my config: https://boron.sh/?v=1&content=zhZI_b9swEMV3fwUvD1naApactOiiJp2CAu2QFA06GR0Y-WQxIHnE3cl_-ukLyoYtT-Wmd-_9cHzi96SZWlug88FIFnBpDZdcOPwluJyDb515Tgi8UXTCEQceBEYSfXKhns3mq7v4W92GmmIScmsSrDiXmP7BfeBN5wN9na9u49H9fJw1ozJf3X359DECVbdAVXUcAu_KBON5MSEXkWhX6KBk4knhFNbTAU7Eb2kC6Qukp5AvCOCn-GQoKnzqWOJ4p0nqraTelNNVyonSWMgxgh8vz0_TLSaAVADBJ9KHuq5PlKchvpKAOwi1lAyjAcZYe83BHfB-TZ0bgjW4-Xx782ECrBJX5iOpuZj1BHzk9M6gPe9wmU1CWrZQctL2lzW-jX_23NzrAUZ7AwuENkNwAtpnIdXrSraFtSUp8rmVY5En9arL2SO3Q6Rk42eD3ixrs1zS3sUcqG45Ls_PY7nmVme_KLMYvOpA-r_E0fUP&theme=nord&backdrop=none&syntax=ansi&padding=48&radius=12&titleBar=1&title=Example+Help+Text&shadow=100&columns=80&aspect=og
+// Link with my config: https://boron.sh/?v=1&content=zjZI9b9swEIZ3_4UsL7K0BSw5bdHFRbcgQDokQYNORgZGPlkMSB5xd_JHf31BybXlKeVG8p7nXhx5nzRTY3O0PhjJHC6t4ZILhz8El3PwjTPPCYE3ilY44sC9wEiiTy7Us9nV6nP8rW5Dy1Ik5NYkWHEumL5gNdXUgTd4uVrdxAHDuM5Y7_-DHNDHsWr5z_X965cIVO0cVdVyCLwrN6P_2YRcRKJdaQVKJp4UTmEdHeBE_JYmklQkwSfSH3VdHz0PfXwlAbcQaigZhgIYY-01B3fAxzW1rg-2xPW3m-tPE6EWoZKTpjsb74aJn9K8HmC0N7BAaNMHJ6B9FlL1nCauKnFlPpKai1mP4W45fTBoxzuc7ybQWwnwppzOQwGenCgND96yRGf4-fz4MJ3QRLAtgi1JCXNyPIlPhuMpfBo1l3G7AnYU8kXnASynF9Tslps-UrJhu0RnlnW5WNDexRyobjguTn9lseZGZ78osxi8ak_6HjFW_QU&theme=nord&backdrop=none&syntax=ansi&padding=48&radius=12&titleBar=1&title=Example+Help+Text&shadow=100&columns=80&aspect=og
 
 // biome-ignore-all lint/suspicious/noImplicitAnyLet: TypeScript can handle `args`.
 // biome-ignore-all lint/suspicious/noExplicitAny: Acceptable for error catching.
@@ -16,7 +16,7 @@ import {
 const config = {
 	usage: [
 		"logreader [options] [ application.log ]",
-		"logreader gui [options] [ application.log ]",
+		"logreader ui [options] [ application.log ]",
 	],
 	header: "Inspect, filter, and analyze application logs from your terminal.",
 	footer:

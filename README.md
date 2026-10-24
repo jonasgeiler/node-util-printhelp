@@ -4,7 +4,7 @@
 
 - Simple help text generation **without** introducing a **whole argument parser** to your project.
 - **`node --help`-inspired** help text format, kept **simple** and **readable**.
-- **Basic API** that uses the **same** configuration as passed to [`util.parseArgs`][].
+- **Basic API** designed as a sibling function to [`util.parseArgs`][], re-using the same configuration.
 - Adapts to terminal **width** and **styling capabilities**.
 
 [![Version badge](https://img.shields.io/npm/v/node-util-printhelp?style=for-the-badge&label=Version&labelColor=333&color=e8e8e8)][latest-release]
@@ -12,7 +12,7 @@
 [![JSR score badge](https://jsr.io/badges/@jonasgeiler/node-util-printhelp/score?style=for-the-badge&label=Score&logoColor=fff&labelColor=333&color=e8e8e8&cacheSeconds=86400)][package-on-jsr]
 [![Minified size (gzip) badge](https://img.shields.io/bundlejs/size/node-util-printhelp?style=for-the-badge&labelColor=333&color=5fa04e&cacheSeconds=86400)][package-on-bundlejs]
 
-![Example help text](./.github/assets/example-help-text.svg)
+![Example Help Text](./.github/assets/example-help-text.svg)
 
 ```ts
 import { parseArgs, styleText } from "node:util";
@@ -25,7 +25,7 @@ import {
 const config = {
 	usage: [
 		"logreader [options] [ application.log ]",
-		"logreader gui [options] [ application.log ]",
+		"logreader ui [options] [ application.log ]",
 	],
 	header: "Inspect, filter, and analyze application logs from your terminal.",
 	footer:
@@ -254,25 +254,26 @@ import { printHelp } from "@jonasgeiler/node-util-printhelp";
 
 ## API
 
-### `printHelp(config[, options])`
+### `printHelp(config[, additionalOptions])`
 
-- `config` [`<Object>`][] The configuration shared with [`util.parseArgs`][]. It accepts the standard `util.ParseArgsConfig` fields, plus some extra help-text properties described below.
-  - `usage` [`<string>`][] | [`<string>`][][] One or more lines of usage text appended after `Usage: `, for example `"toolname [options] <input-file> <output-file>"`. **Default:** CLI name deduced from the running process + `" [options]"`
-  - `header` [`<string>`][] Optional header text printed before the usage line.
-  - `footer` [`<string>`][] Optional footer text printed after the options list.
-  - `options` [`<Object>`][] The options for [`util.parseArgs`][]. Options are sorted alphabetically by their key in the help text.
+- `config` [`<Object>`][] The configuration shared with [`util.parseArgs`][]. It accepts the standard `ParseArgsConfig` fields, plus some extra help-text properties described below.
+  - `usage` [`<string>`][] | [`<string>`][][] A usage pattern or an array of usage patterns, printed after `Usage: ` on one or multiple lines. For example `"toolname [options] <input-file> <output-file>"`. **Default:** CLI name deduced from the running process + `" [options]"`
+  - `header` [`<string>`][] Optional header text printed before the usage patterns.
+  - `footer` [`<string>`][] Optional footer text printed after the list of options.
+  - `options` [`<Object>`][] The options for [`util.parseArgs`][].
     - `description` [`<string>`][] An optional description printed beside the option. It is used only by `printHelp` and ignored by [`util.parseArgs`][].
-- `additionalOptions` [`<Object>`][] Optional additional settings exclusive to `printHelp`.
-  - `stream` [`<tty.WriteStream>`][] The [`WriteStream`][] to which help text is written and which determines if text styling is used and how wide the output should be. **Default:** `process.stdout`
+- `additionalOptions` [`<Object>`][] Additional options exclusive to `printHelp`.
+  - `stream` [`<stream.Writable>`][] The [TTY][] stream to which help text is written and which determines if text styling is used and how wide the output should be. **Default:** `process.stdout`
 
 Prints formatted help text for a [`util.parseArgs`][] configuration.
 
-The option's `short`, `type`, and `default` fields control the displayed option
-spelling and default value. String options are displayed with an `=...` value
+The `options` item's `short`, `type`, and `default` fields control the displayed
+option name and default value. String options are displayed with an `=...` value
 placeholder. When `allowNegative` is enabled, boolean options with a default
-of `true` are displayed using their `--no-` form.
+of `true` are displayed using their `--no-` form and ignore their `short` alias.
 
-Descriptions, footers, and option descriptions are wrapped to fit the terminal.
+The `header`, `footer`, and option's `description` are wrapped to fit the
+given [TTY][] stream.
 
 The `COLUMNS` environment variable takes precedence over the `stream.columns`
 value when determining the output width.
@@ -295,7 +296,8 @@ framework, such as [`yargs`][], [`commander.js`][] or [`oclif`][].
 [jsr.io]: https://jsr.io/
 [`<Object>`]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 [`<string>`]: https://developer.mozilla.org/docs/Web/JavaScript/Data_structures#string_type
-[`<tty.WriteStream>`]: https://nodejs.org/api/tty.html#class-ttywritestream
+[`<stream.Writable>`]: https://nodejs.org/api/stream.html#class-streamwritable
+[TTY]: https://nodejs.org/api/tty.html
 [`yargs`]: https://yargs.js.org/
 [`commander.js`]: https://github.com/tj/commander.js
 [`oclif`]: https://oclif.io/

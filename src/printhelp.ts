@@ -61,7 +61,7 @@ export interface ParseArgsAndPrintHelpConfig extends ParseArgsConfig {
  */
 export interface AdditionalPrintHelpOptions {
 	/**
-	 * A stream where the help text will be written to.
+	 * A TTY stream where the help text will be written to.
 	 * Also used to validate if colors can be used and how many columns the
 	 * help text can be wide.
 	 * @default process.stdout
