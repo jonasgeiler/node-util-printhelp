@@ -68,7 +68,7 @@ export interface AdditionalPrintHelpOptions {
 	 */
 	stream?: NodeJS.WritableStream | undefined;
 	// TODO: Maybe add `ignoreErrors`, similar to `new Console()` options?
-	// TODO: Maybe add `validateStream`, passed along to `styleText`?
+	// TODO: Maybe add `validateStream`, passed along to `styleText`? Or maybe `colorMode`, similar to `new Console()` options?
 }
 
 /**

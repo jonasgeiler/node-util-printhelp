@@ -31,6 +31,7 @@ const config = {
 	footer:
 		"Documentation: https://example.com/logreader/docs\n" +
 		"Report issues: https://example.com/logreader/issues",
+	allowPositionals: true,
 	allowNegative: true,
 	options: {
 		follow: {
@@ -92,7 +93,7 @@ try {
 }
 
 if (args.values.help) {
-	// If "-h/--help" argument is used, print help text and exit 0.
+	// If "-h/--help" option is used, print help text and exit 0.
 	printHelp(config);
 	process.exit(0);
 }
