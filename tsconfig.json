@@ -5,14 +5,7 @@
 
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
-	"include": [
-		"src"
-	],
 	"compilerOptions": {
-		// File Layout
-		"rootDir": "./src",
-		"outDir": "./dist",
-
 		// Environment Settings
 		// See also https://aka.ms/tsconfig/module
 		"module": "nodenext",
@@ -29,10 +22,7 @@
 		"rewriteRelativeImportExtensions": true,
 
 		// Other Outputs
-		"sourceMap": true,
-		"declaration": true,
-		"declarationMap": true,
-		"listEmittedFiles": true,
+		"noEmit": true,
 
 		// Stricter Typechecking Options
 		"noUncheckedIndexedAccess": true,
