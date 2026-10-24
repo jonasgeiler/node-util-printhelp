@@ -1,7 +1,14 @@
-// Run this to copy the help text with ANSI colors to the Wayland clipboard:
-//  COLUMNS=1000 FORCE_COLOR=1 node ./.github/assets/example-help-text.ts --help | wl-copy
+// This example is also used in the README.
+// To update the colorful example help text screenshot in the README, run this
+// command to copy the help text with ANSI colors to the Wayland clipboard:
+//   $ COLUMNS=1000 FORCE_COLOR=1 node ./examples/logreader.ts --help | wl-copy
 // Afterward, use https://boron.sh to create a nice SVG terminal "screenshot".
 // Link with my config: https://boron.sh/?v=1&content=zjZI9b9swEIZ3_4UsL7K0BSw5bdHFRbcgQDokQYNORgZGPlkMSB5xd_JHf31BybXlKeVG8p7nXhx5nzRTY3O0PhjJHC6t4ZILhz8El3PwjTPPCYE3ilY44sC9wEiiTy7Us9nV6nP8rW5Dy1Ik5NYkWHEumL5gNdXUgTd4uVrdxAHDuM5Y7_-DHNDHsWr5z_X965cIVO0cVdVyCLwrN6P_2YRcRKJdaQVKJp4UTmEdHeBE_JYmklQkwSfSH3VdHz0PfXwlAbcQaigZhgIYY-01B3fAxzW1rg-2xPW3m-tPE6EWoZKTpjsb74aJn9K8HmC0N7BAaNMHJ6B9FlL1nCauKnFlPpKai1mP4W45fTBoxzuc7ybQWwnwppzOQwGenCgND96yRGf4-fz4MJ3QRLAtgi1JCXNyPIlPhuMpfBo1l3G7AnYU8kXnASynF9Tslps-UrJhu0RnlnW5WNDexRyobjguTn9lseZGZ78osxi8ak_6HjFW_QU&theme=nord&backdrop=none&syntax=ansi&padding=48&radius=12&titleBar=1&title=Example+Help+Text&shadow=100&columns=80&aspect=og
+// Then, click on the arrow next to the "Save" button and select "Save as SVG",
+// then click on that.
+// Use the following to replace the example help text screenshot with the
+// downloaded file:
+//   $ mv ~/downloads/boron.sh.svg ./.github/assets/example-help-text.svg
 
 // biome-ignore-all lint/suspicious/noImplicitAnyLet: TypeScript can handle `args`.
 // biome-ignore-all lint/suspicious/noExplicitAny: Acceptable for error catching.
@@ -10,7 +17,7 @@ import { parseArgs, styleText } from "node:util";
 import {
 	type ParseArgsAndPrintHelpConfig,
 	printHelp,
-} from "../../src/printhelp.ts";
+} from "../src/printhelp.ts";
 
 // The same configuration can be passed to `parseArgs` and `printHelp`.
 const config = {

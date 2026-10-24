@@ -67,6 +67,8 @@ export interface AdditionalPrintHelpOptions {
 	 * @default process.stdout
 	 */
 	stream?: NodeJS.WritableStream | undefined;
+	// TODO: Maybe add `ignoreErrors`, similar to `new Console()` options?
+	// TODO: Maybe add `validateStream`, passed along to `styleText`?
 }
 
 /**
@@ -78,6 +80,7 @@ export interface AdditionalPrintHelpOptions {
 export function printHelp(
 	config: ParseArgsAndPrintHelpConfig,
 	{ stream = process.stdout }: AdditionalPrintHelpOptions = {},
+	// TODO: Maybe return the return value of `stream.write()`?
 ) {
 	// Inspired by: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/main/print_help.js
 	// With some learnings from: https://github.com/nodejs/node/blob/99f0ddef2ecfaf21f61a4a2b8643944f6ddab538/lib/internal/util/parse_args/parse_args.js
