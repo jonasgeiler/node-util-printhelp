@@ -23,6 +23,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
 		"@types/node": "26.6.5",
+		"lint-staged": "17.6.0",
 		"typescript": "6.0.3"
 	},
 	"scripts": {
